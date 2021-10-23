@@ -19,40 +19,40 @@
 </head>
 
 <body>
-	<!-- <div id="resultDiv">
-		<div th:if="${title}!=null" th:include="/fragment/commons.html :: fragment(title=${title})">
-
-		</div>
-		<div>
-			<p th:if="${msg}!=null" th:text="${msg}"></p>
-		</div>
-	</div> -->
 	<div class="container" th:replace="/fragments/common :: container(title=${title})">
 	</div>
 	<th:block th:if="${title} == 'Index'">
-		<main role="main" class="container" th:replace="/fragments/common :: main">
+		<main role="main" class="container" th:replace="/fragments/common :: main(title=${title})">
 		</main>
 	</th:block>
 
+	<main role="main" class="container mt-5">
+		<div class="row">
+			<div class="col-md blog-main">
+				<div class="blog-post">
+					<h2 class="blog-post-title">How to use..</h2>
+					<p class="blog-post-meta">Oct 18, 2021 by <a href="#">Jake kim</a></p>
+
+					<hr>
+					<p>
+						데이터베이스 타입 설정<br>
+						데이터베이스 스키마 이름 설정<br>
+						테이블 생성<br>
+						테이블 이름, 컬럼 이름,<br>
+						컬럼 속성, 컬럼 컨스트레인트<br>
+						테이블 생성 쿼리<br>
+						이벤트 트리거 생성 쿼리<br>
+						저장시 json으로 로컬 저장<br>
+						파일 공유하고 싶을때 로컬에 json로 저장한걸 불러오기<br>
+					</p>
+				</div>
+			</div><!-- /.blog-main -->
+		</div>
+	</main>
+
+
 	<footer class="blog-footer" th:replace="/fragments/common :: footer">
 	</footer>
-	<script>
-		// var links = document.querySelectorAll('button[name^="links"]');
-		// for (var i = 0; i < links.length; i++) {
-		// 	links[i].addEventListener("click", function (e) {
-		// 		movePage(e.srcElement.innerHTML)
-		// 	});
-		// }
-		// function movePage(pageName) {
-		// 	pageName = "/" + pageName.toLowerCase();
-		// 	$.ajax({
-		// 		url: pageName,
-		// 		type: "get"
-		// 	}).done(function (res) {
-		// 		$("#resultDiv").replaceWith(res);
-		// 	})
-		// }
-	</script>
 </body>
 
 

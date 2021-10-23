@@ -19,40 +19,14 @@
 </head>
 
 <body>
-	<!-- <div id="resultDiv">
-		<div th:if="${title}!=null" th:include="/fragment/commons.html :: fragment(title=${title})">
-
-		</div>
-		<div>
-			<p th:if="${msg}!=null" th:text="${msg}"></p>
-		</div>
-	</div> -->
-	<div class="container" th:replace="/fragments/common :: container(title=${title})">
+	<div class="container"  th:replace="/fragments/common :: container(title=${title})">
 	</div>
 	<th:block th:if="${title} == 'Index'">
-		<main role="main" class="container" th:replace="/fragments/common :: main">
+		<main role="main" class="container" th:replace="/fragments/common :: main(title=${title})">
 		</main>
 	</th:block>
-
 	<footer class="blog-footer" th:replace="/fragments/common :: footer">
 	</footer>
-	<script>
-		// var links = document.querySelectorAll('button[name^="links"]');
-		// for (var i = 0; i < links.length; i++) {
-		// 	links[i].addEventListener("click", function (e) {
-		// 		movePage(e.srcElement.innerHTML)
-		// 	});
-		// }
-		// function movePage(pageName) {
-		// 	pageName = "/" + pageName.toLowerCase();
-		// 	$.ajax({
-		// 		url: pageName,
-		// 		type: "get"
-		// 	}).done(function (res) {
-		// 		$("#resultDiv").replaceWith(res);
-		// 	})
-		// }
-	</script>
 </body>
 
 

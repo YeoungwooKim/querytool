@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="description" content="">
+	<meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+	<meta name="generator" content="Jekyll v4.1.1">
+
+	<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+	<script th:src="@{/assets/dist/js/bootstrap.min.js}"></script>
+	<script th:src="@{/assets/dist/js/input.js}"></script>
+	<script th:src="@{/assets/dist/js/const.js}"></script>
+	<!-- <script th:src="@{CanvasInput.min.js}"></script> -->
+	<link th:href="@{/assets/dist/css/bootstrap.min.css}" rel="stylesheet">
+	<link th:href="@{/css/index.css}" rel="stylesheet">
+
+	<!-- <meta name="_csrf" th:content="${_csrf.token}">
+	<meta name="_csrf_header" th:content="${_csrf.headerName}"> -->
+	<title th:text="${title}"></title>
+</head>
+
+<body>
+	<div class="container" th:replace="/fragments/common :: container(title=${title})">
+	</div>
+	<th:block th:if="${title} == 'Index'">
+		<main role="main" class="container" th:replace="/fragments/common :: main(title=${title})">
+		</main>
+	</th:block>
+
+	<main role="main" class="container mt-5">
+		<div class="row">
+			<div class="col-md blog-main">
+				<div class="blog-post">
+					<canvas id="canvas">
+
+					</canvas>
+				</div>
+			</div>
+		</div>
+	</main>
+
+
+	<footer class="blog-footer" th:replace="/fragments/common :: footer">
+	</footer>
+</body>
+<script>
+	window.addEventListener('resize', reportWindowSize);
+	function reportWindowSize(e) {
+		changeSizeCanvas(document.getElementById("canvas"))
+	}
+	function changeSizeCanvas(canvas) {
+		canvas.width = document.querySelector('.blog-post').offsetWidth
+		canvas.height = 1100
+		canvas.style.border = "2px solid gray"
+	}
+
+	window.onload = function () {
+		var canvas = document.getElementById("canvas");
+		var ctx = canvas.getContext("2d");
+		canvas.style.border = "2px solid gray"
+		canvas.addEventListener("mousedown", listenEvent)
+		canvas.addEventListener("mouseup", listenEvent)
+		canvas.addEventListener("mousemove", listenEvent)
+		canvas.addEventListener("mouseout", listenEvent)
+		canvas.addEventListener("mouseenter", listenEvent)
+		canvas.oncontextmenu = function (e) { e.preventDefault(); };
+		changeSizeCanvas(canvas)
+	}
+
+	function listenEvent(e) {
+		//console.log(e.type);
+		if (pos.draw) {
+			if (e.type == "mousedown") {
+				if (e.which == 1) {
+					// left click
+				} else {
+					//right click
+					columnCount = 0
+					while (columnCount <= 0) {
+						columnCount = prompt("column size?");
+					}
+
+					pos = changePos(pos, e);
+					box.x = pos.x;
+					box.y = pos.y;
+					if (canvas.width < box.x + box.width) {
+						box.x = canvas.width - box.width
+					} else {
+						box.x = e.layerX
+					}
+					if (canvas.height < box.y + box.height) {
+						box.y = canvas.height - box.height
+					} else {
+						box.y = e.layerY
+					}
+					drawRect(box);
+				}
+			} else if (e.type == "mouseup") {
+
+			} else if (e.type == "mousemove") {
+				//	pos = changePos(pos, e);
+			} else if (e.type == "mouseout") {
+				pos.draw = false
+			}
+		} else {
+			if (e.type == "mouseenter") {
+				pos.draw = true
+			}
+		}
+
+	}
+
+	function changePos(pos, e) {
+		var rect = canvas.getBoundingClientRect();
+		pos.x = e.layerX - rect.left
+		pos.y = e.layerY - rect.top
+		return pos
+	}
+	function drawRect(box) {
+		var canvas = document.getElementById("canvas");
+		var ctx = canvas.getContext("2d");
+		//ctx.fillStyle = "rgb(200,0,0)";
+		//ctx.fillRect(box.x, box.y, box.width, box.height);
+		var tmp = new Forms("POST", "#", box, columnCount);
+		formArr[tmp.id]=tmp;
+		console.log(formArr);
+	}
+
+
+</script>
+
+</html>

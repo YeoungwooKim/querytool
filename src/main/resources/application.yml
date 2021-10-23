@@ -1,8 +1,11 @@
 spring:
   datasource: #데이터베이스 수정해야함!
-    url: jdbc:mysql://localhost:3306/board?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
-    username: root
-    password: youngwo1
+    hikari:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      jdbc-url: jdbc:mysql://localhost:3306/query?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
+      username: root
+      password: youngwo1
+      connection-test-query: SELECT 1
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
