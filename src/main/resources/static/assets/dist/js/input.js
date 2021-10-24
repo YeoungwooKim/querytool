@@ -5,6 +5,22 @@ function Forms(method, action, pos, columnCount) {
     this.action = action;
     this.columnCount = columnCount;
     this.pos = JSON.parse(JSON.stringify(pos));
+
+    btns = document.querySelectorAll(".moveBtn")
+    for (var i = 0; i < btns.length; i++) {
+        btns[i].addEventListener("mousedown", moveEvent)
+        btns[i].addEventListener("mouseout", moveEvent)
+    }
+}
+var mouseFlag = false
+var mouseEvent = null
+var prevPos = null 
+function moveEvent(e) {
+    if (e.which == 1) {
+        prevPos = JSON.parse(JSON.stringify(box));
+        mouseFlag = true
+        mouseEvent = e
+    }
 }
 
 function addColumn(e) {
@@ -40,6 +56,12 @@ function removeDiv(parentNodeId) {
 }
 
 function setForm(method, action, columnCount) {
+    moveBtn = document.createElement("input");
+    moveBtn.setAttribute("type", "button");
+    moveBtn.setAttribute("value", "move");
+    moveBtn.setAttribute("class", "moveBtn");
+    div.appendChild(moveBtn);
+
     var tmpInput = document.createElement('input');
     tmpInput.setAttribute("type", "text");
     tmpInput.setAttribute("id", 'newForm' + formNum + "_tblName_" + formNum);

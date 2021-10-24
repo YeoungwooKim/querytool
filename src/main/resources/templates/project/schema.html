@@ -80,8 +80,34 @@
 					columnCount = 0
 					while (columnCount <= 0) {
 						columnCount = prompt("column size?");
+						if (columnCount == null) {
+							break;
+						}
+					}
+					if (columnCount != null) {
+						pos = changePos(pos, e);
+						box.x = pos.x;
+						box.y = pos.y;
+						if (canvas.width < box.x + box.width) {
+							box.x = canvas.width - box.width
+						} else {
+							box.x = e.layerX
+						}
+						if (canvas.height < box.y + box.height) {
+							box.y = canvas.height - box.height
+						} else {
+							box.y = e.layerY
+						}
+						console.log(box);
+						drawRect(box);
 					}
 
+				}
+			} else if (e.type == "mouseup") {
+
+			} else if (e.type == "mousemove") {
+				if (mouseFlag) {
+					mouseFlag = false;
 					pos = changePos(pos, e);
 					box.x = pos.x;
 					box.y = pos.y;
@@ -95,12 +121,13 @@
 					} else {
 						box.y = e.layerY
 					}
-					drawRect(box);
+					console.log(mouseEvent)
+					div = document.getElementById(mouseEvent.path[1].id)
+					div.style.position = 'absolute';
+					div.style.left = box.x + "px"
+					div.style.top = box.y + "px"
+					div.style.border = "2px solid gray"
 				}
-			} else if (e.type == "mouseup") {
-
-			} else if (e.type == "mousemove") {
-				//	pos = changePos(pos, e);
 			} else if (e.type == "mouseout") {
 				pos.draw = false
 			}
@@ -124,7 +151,7 @@
 		//ctx.fillStyle = "rgb(200,0,0)";
 		//ctx.fillRect(box.x, box.y, box.width, box.height);
 		var tmp = new Forms("POST", "#", box, columnCount);
-		formArr[tmp.id]=tmp;
+		formArr[tmp.id] = tmp;
 		console.log(formArr);
 	}
 
