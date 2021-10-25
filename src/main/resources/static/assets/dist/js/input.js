@@ -14,9 +14,16 @@ function Forms(method, action, pos, columnCount) {
 }
 var mouseFlag = false
 var mouseEvent = null
-var prevPos = null 
+
 function moveEvent(e) {
     if (e.which == 1) {
+        div = null
+        try {
+            div = e.path[1]
+        } catch (e) {
+            div = composedPath(e.target)
+        }
+        //console.log(div);
         prevPos = JSON.parse(JSON.stringify(box));
         mouseFlag = true
         mouseEvent = e
@@ -34,6 +41,32 @@ function addColumn(e) {
     removeDiv(div.id);
     var tmp = new Forms("POST", "#", originPos, columnCount);
     formArr[tmp.id] = tmp;
+}
+
+function saveLocal() {
+    var divs = document.querySelectorAll("div[id^='div_']")
+    //console.log(formArr);
+    test = divs;
+    for (var i = 0; i < divs.length; i++) {
+       // var colName = 
+    }
+}
+
+
+function deleteColumn(e) {
+    var columnCount = Number(formArr[div.lastChild.id].columnCount) - 1
+    if (columnCount > 0) {
+        idx = e.path[1].children.length - 4
+        str = e.path[1].children[idx].id
+        str = str.split("_")
+        parentNode = e.path[1].id
+        div = document.getElementById(parentNode).parentNode
+
+        var originPos = formArr[div.lastChild.id].pos
+        removeDiv(div.id);
+        var tmp = new Forms("POST", "#", originPos, columnCount);
+        formArr[tmp.id] = tmp;
+    }
 }
 
 function initDiv(method, action, pos, columnCount) {
@@ -96,11 +129,18 @@ function setForm(method, action, columnCount) {
 
         form.appendChild(tmpInput);
 
+        var btn = document.createElement('input');
+        btn.setAttribute("type", "button");
+        btn.setAttribute("id", 'newForm' + formNum + "_delBtn_" + i);
+        btn.addEventListener("click", deleteColumn)
+        btn.setAttribute("value", "delete");
+        form.appendChild(btn);
+
         form.appendChild(document.createElement("br"))
     }
     var btn = document.createElement('input');
     btn.setAttribute("type", "button");
-    btn.setAttribute("id", 'newForm' + formNum + "_btn");
+    btn.setAttribute("id", 'newForm' + formNum + "_addBtn");
     btn.addEventListener("click", addColumn)
     btn.setAttribute("value", "add");
     form.appendChild(btn);
@@ -113,8 +153,6 @@ function setDivPos(div, pos) {
     div.style.left = pos.x + "px"
     div.style.top = pos.y + "px"
     div.style.border = "2px solid gray"
-    //div.style.width = pos.width + "px";
-    //div.style.height = pos.height + "px";
     div.oncontextmenu = function (e) { e.preventDefault(); };
     return div
 }
