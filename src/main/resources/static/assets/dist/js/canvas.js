@@ -47,9 +47,9 @@ function listenEvent(e) {
         } else if (e.type == "mouseup") {
             if (mouseFlag) {
                 changePos(pos, e);
-                console.log("currnet pos ", pos, "div width ", div.offsetWidth, "div height ", div.offsetHeight);
-                test = e
-                formArr[div.lastChild.id].pos = pos
+                div = mouseEvent.path[2];
+                console.log(div);
+                formArr[div.children[4].id].pos = pos
                 div.style.position = 'absolute';
                 div.style.left = pos.x + "px"
                 div.style.top = pos.y + "px"

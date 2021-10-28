@@ -1,3 +1,26 @@
+div [name="inputDiv"]>input[type="text"] {
+  float: left;
+  width: 180px;
+  position: relative; 
+  left: 15.3px;
+}
+div [name="inputDiv"]>input[type="button"] {
+  float: left;
+  width: 100px;
+  position: relative; 
+  left: 15.3px;
+}
+div [id^="div_"] {
+  float: left;
+  width: 470px;
+}
+input[id$="_exitBtn"]:hover{
+  color: white;
+}
+input[id$="_exitBtn"]{
+  color: #ffc107;
+}
+
 .bd-placeholder-img {
     font-size: 1.125rem;
     text-anchor: middle;
