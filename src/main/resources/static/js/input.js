@@ -13,8 +13,6 @@ function Forms(method, action, pos, columnCount) {
         btns[i].addEventListener("mouseout", moveEvent)
     }
 }
-var mouseFlag = false
-var mouseEvent = null
 
 function moveEvent(e) {
     if (e.which == 1) {
@@ -25,7 +23,9 @@ function moveEvent(e) {
         }
         prevPos = JSON.parse(JSON.stringify(box));
         mouseFlag = true
-        mouseEvent = e.path[1]
+        if (e.path[3].id.includes("div_")) {
+            selectedDiv = e.path[3]
+        }
     }
 }
 
@@ -40,31 +40,65 @@ function addColumn(e) {
     removeDiv(div[4].id);
     var tmp = new Forms("POST", "#", originPos, columnCount);
     formArr[tmp.id] = tmp;
+    if (e.path[3].id.includes("div_")) {
+        selectedDiv = e.path[3]
+    }
+}
+function getTableName(formId) {
+    var tableName = document.querySelectorAll("input[id^='" + formId + "'][type=text][class*='tableName']");
+    return tableName[0].value;
+}
+
+function getColumn(formId) {
+    var arr = []
+    var colName = document.querySelectorAll("input[id^='" + formId + "'][type=text][class*='colName']");
+    var colAttribute = document.querySelectorAll("input[id^='" + formId + "'][type=text][class*='colAttribute']");
+
+    for (var i = 0; i < colName.length; i++) {
+        arr.push(
+            {
+                name: colName[i].value,
+                type: colAttribute[i].value
+            }
+        )
+    }
+    return arr;
 }
 
 function saveLocal() {
-    var divs = document.querySelectorAll("div[id^='div_']")
-    //console.log(formArr);
-    test = divs;
-    for (var i = 0; i < divs.length; i++) {
+    var currentErdName = document.getElementById("Current_Erd").value;
+    var list = []
+    for (var key in formArr) {
+        if(document.getElementById(key) != null){
+            list.push({
+                name: key,
+                action: formArr[key].action,
+                columnCount: formArr[key].columnCount,
+                pos: formArr[key].pos,
+                tableName: getTableName(key),
+                column: getColumn(key)
+            });
+        }
+    }
+    localStorage.setItem(currentErdName, JSON.stringify(list));
+    console.log(JSON.parse(localStorage.getItem("erd_name")));
+}
 
+function deleteColumn(e) {
+    formId = div.id.split("_")
+    formId = "form_" + formId[1];
+    var cCount = Number(formArr[formId].columnCount) - 1
+    if (cCount > 0) {
+        e.target.parentNode.remove()
+        formArr[formId].columnCount = cCount;
+    } else {
+        delete formArr[formId];
+        ((e.target.parentNode).parentNode).parentNode.remove()
     }
 }
 
-
-function deleteColumn(e) {
-    var columnCount = Number(formArr[div.lastChild.id].columnCount) - 1
-    if (columnCount > 0) {
-        idx = e.path[1].children.length - 4
-        str = e.path[1].children[idx].id
-        str = str.split("_")
-        parentNode = e.path[1].id
-        div = document.getElementById(parentNode).parentNode
-        var originPos = formArr[div.lastChild.id].pos
-        removeDiv(div.id);
-        var tmp = new Forms("POST", "#", originPos, columnCount);
-        formArr[tmp.id] = tmp;
-    }
+function generateQuery(e) {
+    console.log("hi");
 }
 
 function initDiv(method, action, pos, columnCount) {
@@ -75,52 +109,51 @@ function initDiv(method, action, pos, columnCount) {
 
     var btn = document.createElement('input');
     btn.setAttribute("type", "button");
-    btn.setAttribute("id", 'newForm' + formNum + "_addBtn");
-    btn.setAttribute("class", "btn btn-outline-success");
+    btn.setAttribute("id", 'form_' + formNum + "_addBtn");
+    btn.setAttribute("class", "btn btn-outline-success my-2 mx-1");
     btn.addEventListener("click", addColumn)
     btn.setAttribute("value", "add");
     div.appendChild(btn);
 
-    div = setDivPos(div, pos);
-    //appendClass(div);
+    btn = document.createElement('input');
+    btn.setAttribute("type", "button");
+    btn.setAttribute("id", 'form_' + formNum + "_genBtn");
+    btn.setAttribute("class", "btn btn-outline-info my-2 mx-1");
+    btn.addEventListener("click", generateQuery)
+    btn.setAttribute("value", "generate");
+    div.appendChild(btn);
 
+    div = setDivPos(div, pos);
     formNum += 1
     document.getElementsByClassName("blog-post")[0].appendChild(div);
+    //formArr[div.children[4].id].pos = JSON.parse(JSON.stringify(pos));
 }
 
 function removeDiv(parentNodeId) {
-    var div = document.getElementById(parentNodeId);
-    delete formArr[parentNodeId]
-    div.remove();
+    delete formArr[parentNodeId];
+    var div = document.getElementById(parentNodeId).id.split("_");
+    document.getElementById("div_" + div[1]).remove();
 }
 
 function setForm(method, action, columnCount) {
     var span = document.createElement("span");
-    span.setAttribute("id", "newForm_" + formNum + "_moveBtn");
-    //span.setAttribute("onclick","moveEvent(e)");
+    span.setAttribute("id", "form_" + formNum + "_moveBtn");
 
     var icon = document.createElement("i");
     icon.setAttribute("class", "fas fa-arrows-alt fa-2x");
     span.appendChild(icon);
     div.appendChild(span);
-    // moveBtn = document.createElement("input");
-    // moveBtn.setAttribute("type", "button");
-    // moveBtn.setAttribute("value", "move");
-    // moveBtn.setAttribute("class", "fas fa-arrows-alt fa-2x");
-    // moveBtn.setAttribute("onclick","moveEvent(e)")
-    // moveBtn.setAttribute("id", "newForm_" + formNum + "_moveBtn");
-    // div.appendChild(moveBtn);
 
     var tmpInput = document.createElement('input');
     tmpInput.setAttribute("type", "text");
-    tmpInput.setAttribute("id", 'newForm' + formNum + "_tblName_" + formNum);
+    tmpInput.setAttribute("id", 'form_' + formNum + "_tblName_" + formNum);
+    tmpInput.setAttribute("class", "tableName no-drag");
     tmpInput.setAttribute("placeholder", " Table Name");
     div.appendChild(tmpInput);
-    // form.appendChild(document.createElement("br"))
 
     exitBtn = document.createElement("input");
     exitBtn.setAttribute("type", "button");
-    exitBtn.setAttribute("id", 'newForm' + formNum + "_exitBtn");
+    exitBtn.setAttribute("id", 'form_' + formNum + "_exitBtn");
     exitBtn.setAttribute("class", "btn btn-outline-warning");
     exitBtn.setAttribute("style", "float: right;");
     exitBtn.setAttribute("value", "close");
@@ -139,31 +172,28 @@ function setForm(method, action, columnCount) {
         tmpDiv.setAttribute("class", "row");
         tmpInput = document.createElement('input');
         tmpInput.setAttribute("type", "text");
-        //tmpInput.setAttribute("class", "form-control");
-        tmpInput.setAttribute("id", 'newForm' + formNum + "_colName_" + i);
+        tmpInput.setAttribute("id", 'form_' + formNum + "_colName_" + i);
+        tmpInput.setAttribute("class", 'colName no-drag');
         tmpInput.setAttribute("placeholder", " Column Name_" + i);
         tmpDiv.appendChild(tmpInput);
 
         tmpInput = document.createElement('input');
         tmpInput.setAttribute("type", "text");
-        //tmpInput.setAttribute("class", "form-control");
-        tmpInput.setAttribute("id", 'newForm' + formNum + "_colAttribute_" + i);
+        tmpInput.setAttribute("id", 'form_' + formNum + "_colAttribute_" + i);
+        tmpInput.setAttribute("class", 'colAttribute no-drag');
         tmpInput.setAttribute("placeholder", " Column Attr_" + i);
 
         tmpDiv.appendChild(tmpInput);
 
         var btn = document.createElement('input');
         btn.setAttribute("type", "button");
-        btn.setAttribute("id", 'newForm' + formNum + "_delBtn_" + i);
-        btn.setAttribute("class", "btn btn-outline-danger");
+        btn.setAttribute("id", 'form_' + formNum + "_delBtn_" + i);
+        btn.setAttribute("class", "btn btn-outline-danger ml-1");
         btn.addEventListener("click", deleteColumn)
         btn.setAttribute("value", "delete");
         tmpDiv.appendChild(btn);
         form.appendChild(tmpDiv);
     }
-
-    //div.appendChild(form);
-    //form.appendChild(document.createElement("br"))
     return form;
 }
 

@@ -11,3 +11,6 @@ var box = {
 }
 var formNum = 0;
 var formArr = {};
+
+var mouseFlag = false
+var selectedDiv = null

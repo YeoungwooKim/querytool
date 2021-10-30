@@ -12,6 +12,7 @@ function changeSizeCanvas(canvas) {
 window.onload = function () {
     var canvas = document.getElementById("canvas");
     var ctx = canvas.getContext("2d");
+    var option = document.getElementById("erds");
     canvas.style.border = "2px solid gray"
     canvas.addEventListener("mousedown", listenEvent)
     canvas.addEventListener("mouseup", listenEvent)
@@ -47,9 +48,8 @@ function listenEvent(e) {
         } else if (e.type == "mouseup") {
             if (mouseFlag) {
                 changePos(pos, e);
-                div = mouseEvent.path[2];
-                console.log(div);
-                formArr[div.children[4].id].pos = pos
+                div = selectedDiv;
+                formArr[div.children[4].id].pos = JSON.parse(JSON.stringify(pos));
                 div.style.position = 'absolute';
                 div.style.left = pos.x + "px"
                 div.style.top = pos.y + "px"
@@ -66,7 +66,6 @@ function listenEvent(e) {
             pos.draw = true
         }
     }
-
 }
 
 function changePos(pos, e) {
@@ -95,3 +94,4 @@ function drawRect(box) {
     formArr[tmp.id] = tmp;
     console.log(formArr);
 }
+
