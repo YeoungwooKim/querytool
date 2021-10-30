@@ -12,7 +12,6 @@ function changeSizeCanvas(canvas) {
 window.onload = function () {
     var canvas = document.getElementById("canvas");
     var ctx = canvas.getContext("2d");
-    var option = document.getElementById("erds");
     canvas.style.border = "2px solid gray"
     canvas.addEventListener("mousedown", listenEvent)
     canvas.addEventListener("mouseup", listenEvent)
@@ -21,6 +20,18 @@ window.onload = function () {
     canvas.addEventListener("mouseenter", listenEvent)
     canvas.oncontextmenu = function (e) { e.preventDefault(); };
     changeSizeCanvas(canvas)
+    addOption()
+}
+
+function addOption() {
+    var option = document.getElementById("erds");
+    for (i = 0; i < localStorage.length; i++) {
+        key = localStorage.key(i);
+        if (key.includes("queryGen_")) {
+            key = key.split("_");
+            option.innerHTML += "<option>" + key[1] + "</option>"
+        }
+    }
 }
 
 function listenEvent(e) {

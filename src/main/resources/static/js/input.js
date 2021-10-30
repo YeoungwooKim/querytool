@@ -65,11 +65,24 @@ function getColumn(formId) {
     return arr;
 }
 
+function loadData(){
+    var selectedOption = document.getElementById("erds").value
+    if (selectedOption!="none"){
+        var item = JSON.parse(localStorage.getItem("queryGen_"+selectedOption));
+        for(var i =0; i<item.length; i++){
+            console.log(item[i]);
+            //var tmp = new Forms("POST", "#", box, columnCount);
+            var tmp = new Forms("POST","#",item[i].pos, item[i].columnCount);
+        }
+    }
+}
+
 function saveLocal() {
     var currentErdName = document.getElementById("Current_Erd").value;
+    console.log(currentErdName);
     var list = []
     for (var key in formArr) {
-        if(document.getElementById(key) != null){
+        if (document.getElementById(key) != null) {
             list.push({
                 name: key,
                 action: formArr[key].action,
@@ -80,8 +93,8 @@ function saveLocal() {
             });
         }
     }
-    localStorage.setItem(currentErdName, JSON.stringify(list));
-    console.log(JSON.parse(localStorage.getItem("erd_name")));
+    localStorage.setItem("queryGen_" + currentErdName, JSON.stringify(list));
+    console.log(JSON.parse(localStorage.getItem("queryGen_" + currentErdName)));
 }
 
 function deleteColumn(e) {
