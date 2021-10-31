@@ -101,7 +101,7 @@ function drawRect(box) {
     var ctx = canvas.getContext("2d");
     //ctx.fillStyle = "rgb(200,0,0)";
     //ctx.fillRect(box.x, box.y, box.width, box.height);
-    var tmp = new Forms("POST", "#", box, columnCount);
+    var tmp = new Forms("POST", "#", box, columnCount, -1);
     formArr[tmp.id] = tmp;
     console.log(formArr);
 }

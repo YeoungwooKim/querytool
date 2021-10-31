@@ -1,5 +1,5 @@
-function Forms(method, action, pos, columnCount) {
-    initDiv(method, action, pos, columnCount);
+function Forms(method, action, pos, columnCount, loadIdx) {
+    initDiv(method, action, pos, columnCount, loadIdx);
     this.id = "form_" + String(formNum - 1);
     this.method = method;
     this.action = action;
@@ -30,16 +30,51 @@ function moveEvent(e) {
 }
 
 function addColumn(e) {
-    idx = e.path[1].children.length - 4
-    str = e.path[1].children[idx].id
-    str = str.split("_")
-    parentNode = e.path[1].id
-    div = document.getElementById(parentNode).children
-    var columnCount = Number(formArr[div[4].id].columnCount) + 1
-    var originPos = formArr[div[4].id].pos;
-    removeDiv(div[4].id);
-    var tmp = new Forms("POST", "#", originPos, columnCount);
-    formArr[tmp.id] = tmp;
+    /*
+    이벤트 객체로 이벤트 송신지 찾기
+    formArr에 해당하는 거에 컬럼수 + 1
+    dom객체에 추가!
+    */
+    var formId = e.target.id.split("_addBtn")[0];
+    var form = document.getElementById(formId);
+
+    var tmpDiv = document.createElement("div");
+    tmpDiv.setAttribute("name", "inputDiv");
+    tmpDiv.setAttribute("class", "row");
+
+    var tmpInput = document.createElement('input');
+    tmpInput.setAttribute("type", "text");
+    tmpInput.setAttribute("id", formId + "_colName_" + formArr[formId].columnCount);
+    tmpInput.setAttribute("class", 'colName no-drag');
+    tmpInput.setAttribute("placeholder", " Column Name_" + i);
+    tmpDiv.appendChild(tmpInput)
+    tmpInput = document.createElement('input');
+    tmpInput.setAttribute("type", "text");
+    tmpInput.setAttribute("id", formId + "_colAttribute_" + formArr[formId].columnCount);
+    tmpInput.setAttribute("class", 'colAttribute no-drag');
+    tmpInput.setAttribute("placeholder", " Column Attr_" + i);
+    tmpDiv.appendChild(tmpInput);
+
+    var btn = document.createElement('input');
+    btn.setAttribute("type", "button");
+    btn.setAttribute("id", formId + "_delBtn_" + formArr[formId].columnCount);
+    btn.setAttribute("class", "btn btn-outline-danger ml-1");
+    btn.addEventListener("click", deleteColumn)
+    btn.setAttribute("value", "delete");
+    tmpDiv.appendChild(btn);
+
+    form.append(tmpDiv)
+    formArr[formId].columnCount = Number(formArr[formId].columnCount) + 1;
+    // idx = e.path[1].children.length - 4
+    // str = e.path[1].children[idx].id
+    // str = str.split("_")
+    // parentNode = e.path[1].id
+    // div = document.getElementById(parentNode).children
+    // var columnCount = Number(formArr[div[4].id].columnCount) + 1
+    // var originPos = formArr[div[4].id].pos;
+    // removeDiv(div[4].id);
+    // var tmp = new Forms("POST", "#", originPos, columnCount, -1);
+    // formArr[tmp.id] = tmp;
     if (e.path[3].id.includes("div_")) {
         selectedDiv = e.path[3]
     }
@@ -65,14 +100,28 @@ function getColumn(formId) {
     return arr;
 }
 
-function loadData(){
+function clearDivs() {
+    var divs = document.querySelectorAll("div[id^='div_'")
+    for (var i = 0; i < divs.length; i++) {
+        divs[i].remove()
+    }
+    formNum = 0;
+}
+
+function loadData() {
+    clearDivs()
     var selectedOption = document.getElementById("erds").value
-    if (selectedOption!="none"){
-        var item = JSON.parse(localStorage.getItem("queryGen_"+selectedOption));
-        for(var i =0; i<item.length; i++){
-            console.log(item[i]);
-            //var tmp = new Forms("POST", "#", box, columnCount);
-            var tmp = new Forms("POST","#",item[i].pos, item[i].columnCount);
+    if (selectedOption != "none") {
+        var item = JSON.parse(localStorage.getItem("queryGen_" + selectedOption));
+        for (var i = 0; i < item.length; i++) {
+            var tmp = new Forms("POST", "#", item[i].pos, item[i].columnCount, i);
+            formArr[item[i].name] = {
+                action: "#",
+                columnCount: item[i].columnCount,
+                id: item[i].name,
+                method: "POST",
+                pos: item[i].pos
+            }
         }
     }
 }
@@ -114,10 +163,10 @@ function generateQuery(e) {
     console.log("hi");
 }
 
-function initDiv(method, action, pos, columnCount) {
+function initDiv(method, action, pos, columnCount, loadIdx) {
     div = document.createElement('div');
     div.setAttribute("id", 'div_' + formNum);
-    form = setForm(method, action, columnCount);
+    form = setForm(method, action, columnCount, loadIdx);
     div.appendChild(form);
 
     var btn = document.createElement('input');
@@ -148,7 +197,7 @@ function removeDiv(parentNodeId) {
     document.getElementById("div_" + div[1]).remove();
 }
 
-function setForm(method, action, columnCount) {
+function setForm(method, action, columnCount, loadIdx) {
     var span = document.createElement("span");
     span.setAttribute("id", "form_" + formNum + "_moveBtn");
 
@@ -157,10 +206,16 @@ function setForm(method, action, columnCount) {
     span.appendChild(icon);
     div.appendChild(span);
 
+    var selectedOption = document.getElementById("erds").value
+    var item = JSON.parse(localStorage.getItem("queryGen_" + selectedOption));
+
     var tmpInput = document.createElement('input');
     tmpInput.setAttribute("type", "text");
     tmpInput.setAttribute("id", 'form_' + formNum + "_tblName_" + formNum);
     tmpInput.setAttribute("class", "tableName no-drag");
+    if (loadIdx >= 0) {
+        tmpInput.setAttribute("value", item[loadIdx].tableName);
+    }
     tmpInput.setAttribute("placeholder", " Table Name");
     div.appendChild(tmpInput);
 
@@ -186,6 +241,9 @@ function setForm(method, action, columnCount) {
         tmpInput = document.createElement('input');
         tmpInput.setAttribute("type", "text");
         tmpInput.setAttribute("id", 'form_' + formNum + "_colName_" + i);
+        if (loadIdx >= 0) {
+            tmpInput.setAttribute("value", item[loadIdx].column[i].name)
+        }
         tmpInput.setAttribute("class", 'colName no-drag');
         tmpInput.setAttribute("placeholder", " Column Name_" + i);
         tmpDiv.appendChild(tmpInput);
@@ -193,6 +251,9 @@ function setForm(method, action, columnCount) {
         tmpInput = document.createElement('input');
         tmpInput.setAttribute("type", "text");
         tmpInput.setAttribute("id", 'form_' + formNum + "_colAttribute_" + i);
+        if (loadIdx >= 0) {
+            tmpInput.setAttribute("value", item[loadIdx].column[i].type)
+        }
         tmpInput.setAttribute("class", 'colAttribute no-drag');
         tmpInput.setAttribute("placeholder", " Column Attr_" + i);
 
