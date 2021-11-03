@@ -14,3 +14,5 @@ var formArr = {};
 
 var mouseFlag = false
 var selectedDiv = null
+
+var previousErd = "none"

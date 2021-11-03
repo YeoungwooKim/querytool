@@ -33,28 +33,28 @@
 			<div class="col-md blog-main">
 				<div class="blog-post">
 					<ul class="nav justify-content-end mb-3">
-						<li class="nav-item mr-4">
+						<li class="nav-item mr-3">
 							<div class="input-group mb-3">
 								<div class="input-group-prepend">
 									<span class="input-group-text" id="erd_explain">Current Erd</span>
 								</div>
-								<input type="text" class="form-control" aria-label="Username"
-									aria-describedby="erd_explain"  id="Current_Erd">
+								<input type="text" class="form-control text-right" aria-label="Username"
+									aria-describedby="erd_explain"  id="Current_Erd" placeholder="none">
 							</div>
 						</li>
-						<li class="nav-item mr-1">
+						<li class="nav-item mr-3">
 							<div class="input-group">
 								<div class="input-group-prepend">
 									<label class="input-group-text" for="erds">ERD NAME</label>
 								</div>
-								<select class="custom-select" id="erds">
+								<select class="custom-select" id="erds" onchange="loadData()" onfocus="setPreviousErd()">
 									<option selected>none</option>
 								</select>
 							</div>
 						</li>
-						<li class="nav-item mr-1">
+						<!-- <li class="nav-item mr-1">
 							<input type="button" class="btn btn-primary " value="Load" onclick="loadData()">
-						</li>
+						</li> -->
 						<li class="nav-item mr-1">
 							<input type="button" class="btn btn-primary " value="Save it!" onclick="saveLocal()">
 						</li>

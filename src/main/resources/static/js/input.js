@@ -29,12 +29,11 @@ function moveEvent(e) {
     }
 }
 
+function drawRef(e) {
+    console.log(e.target);
+}
+
 function addColumn(e) {
-    /*
-    이벤트 객체로 이벤트 송신지 찾기
-    formArr에 해당하는 거에 컬럼수 + 1
-    dom객체에 추가!
-    */
     var formId = e.target.id.split("_addBtn")[0];
     var form = document.getElementById(formId);
 
@@ -58,27 +57,26 @@ function addColumn(e) {
     var btn = document.createElement('input');
     btn.setAttribute("type", "button");
     btn.setAttribute("id", formId + "_delBtn_" + formArr[formId].columnCount);
-    btn.setAttribute("class", "btn btn-outline-danger ml-1");
     btn.addEventListener("click", deleteColumn)
     btn.setAttribute("value", "delete");
     tmpDiv.appendChild(btn);
 
     form.append(tmpDiv)
     formArr[formId].columnCount = Number(formArr[formId].columnCount) + 1;
-    // idx = e.path[1].children.length - 4
-    // str = e.path[1].children[idx].id
-    // str = str.split("_")
-    // parentNode = e.path[1].id
-    // div = document.getElementById(parentNode).children
-    // var columnCount = Number(formArr[div[4].id].columnCount) + 1
-    // var originPos = formArr[div[4].id].pos;
-    // removeDiv(div[4].id);
-    // var tmp = new Forms("POST", "#", originPos, columnCount, -1);
-    // formArr[tmp.id] = tmp;
+
     if (e.path[3].id.includes("div_")) {
         selectedDiv = e.path[3]
     }
 }
+
+function generateQuery(e) {
+    formId = (e.target.previousSibling).previousSibling.id;
+    var tableName = getTableName(formId)
+    var tableColumn = getColumn(formId)
+    console.log(tableName, tableColumn);
+}
+
+
 function getTableName(formId) {
     var tableName = document.querySelectorAll("input[id^='" + formId + "'][type=text][class*='tableName']");
     return tableName[0].value;
@@ -108,27 +106,65 @@ function clearDivs() {
     formNum = 0;
 }
 
-function loadData() {
-    clearDivs()
-    var selectedOption = document.getElementById("erds").value
-    if (selectedOption != "none") {
-        var item = JSON.parse(localStorage.getItem("queryGen_" + selectedOption));
-        for (var i = 0; i < item.length; i++) {
-            var tmp = new Forms("POST", "#", item[i].pos, item[i].columnCount, i);
-            formArr[item[i].name] = {
-                action: "#",
-                columnCount: item[i].columnCount,
-                id: item[i].name,
-                method: "POST",
-                pos: item[i].pos
-            }
+function isChanged() {
+    var currentErdName = document.getElementById("Current_Erd").value;
+    if (currentErdName != "") {
+        var list = JSON.stringify(makeListCurrentCanvas())
+        var savedList = localStorage.getItem("queryGen_" + currentErdName)
+        if (list == savedList) {
+            return false;
+        } else {
+            return true;
         }
     }
+    return false;
 }
 
-function saveLocal() {
-    var currentErdName = document.getElementById("Current_Erd").value;
-    console.log(currentErdName);
+function setPreviousErd() {
+    previousErd = document.getElementById("erds").value;
+}
+
+function getFromLocal(selectedOption) {
+    var item = JSON.parse(localStorage.getItem("queryGen_" + selectedOption));
+    var formArr = {};
+    for (var i = 0; i < item.length; i++) {
+        var tmp = new Forms("POST", "#", item[i].pos, item[i].columnCount, i);
+        formArr[item[i].name] = {
+            action: "#",
+            columnCount: item[i].columnCount,
+            id: item[i].name,
+            method: "POST",
+            pos: item[i].pos
+        }
+    }
+    return formArr;
+}
+
+function loadData() {
+    var selectedOption = document.getElementById("erds").value
+    if (isChanged()) {
+        if (confirm("저장되지 않은 사항이 존재합니다.\n저장하지 않고 이동하시겠습니까? ")) {
+            clearDivs()
+            if (selectedOption != "none") {
+                formArr = getFromLocal(selectedOption);
+                document.getElementById("Current_Erd").value = selectedOption
+            }
+        } else {
+            document.getElementById("erds").value = previousErd;
+        }
+    } else {
+        clearDivs()
+        if (selectedOption != "none") {
+            formArr = getFromLocal(selectedOption);
+            document.getElementById("Current_Erd").value = selectedOption
+        } else {
+            document.getElementById("Current_Erd").value = ""
+        }
+    }
+
+}
+
+function makeListCurrentCanvas() {
     var list = []
     for (var key in formArr) {
         if (document.getElementById(key) != null) {
@@ -142,6 +178,13 @@ function saveLocal() {
             });
         }
     }
+    return list;
+}
+
+function saveLocal() {
+    var currentErdName = document.getElementById("Current_Erd").value;
+    console.log(currentErdName);
+    var list = makeListCurrentCanvas()
     localStorage.setItem("queryGen_" + currentErdName, JSON.stringify(list));
     console.log(JSON.parse(localStorage.getItem("queryGen_" + currentErdName)));
 }
@@ -159,36 +202,39 @@ function deleteColumn(e) {
     }
 }
 
-function generateQuery(e) {
-    console.log("hi");
-}
-
 function initDiv(method, action, pos, columnCount, loadIdx) {
     div = document.createElement('div');
     div.setAttribute("id", 'div_' + formNum);
+    div.setAttribute("name", 'parentDiv')
     form = setForm(method, action, columnCount, loadIdx);
     div.appendChild(form);
 
     var btn = document.createElement('input');
     btn.setAttribute("type", "button");
     btn.setAttribute("id", 'form_' + formNum + "_addBtn");
-    btn.setAttribute("class", "btn btn-outline-success my-2 mx-1");
     btn.addEventListener("click", addColumn)
     btn.setAttribute("value", "add");
     div.appendChild(btn);
 
     btn = document.createElement('input');
     btn.setAttribute("type", "button");
+    btn.setAttribute("id", 'form_' + formNum + "_refBtn");
+    btn.addEventListener("click", drawRef)
+    btn.setAttribute("value", "ref");
+    div.appendChild(btn);
+
+    btn = document.createElement('input');
+    btn.setAttribute("type", "button");
     btn.setAttribute("id", 'form_' + formNum + "_genBtn");
-    btn.setAttribute("class", "btn btn-outline-info my-2 mx-1");
+    //btn.setAttribute("class", "btn btn-outline-info my-2 mx-1");
     btn.addEventListener("click", generateQuery)
     btn.setAttribute("value", "generate");
     div.appendChild(btn);
 
+
     div = setDivPos(div, pos);
     formNum += 1
     document.getElementsByClassName("blog-post")[0].appendChild(div);
-    //formArr[div.children[4].id].pos = JSON.parse(JSON.stringify(pos));
 }
 
 function removeDiv(parentNodeId) {
@@ -222,7 +268,6 @@ function setForm(method, action, columnCount, loadIdx) {
     exitBtn = document.createElement("input");
     exitBtn.setAttribute("type", "button");
     exitBtn.setAttribute("id", 'form_' + formNum + "_exitBtn");
-    exitBtn.setAttribute("class", "btn btn-outline-warning");
     exitBtn.setAttribute("style", "float: right;");
     exitBtn.setAttribute("value", "close");
     exitBtn.setAttribute("onclick", "removeDiv('div_" + formNum + "')")
@@ -238,6 +283,7 @@ function setForm(method, action, columnCount, loadIdx) {
         var tmpDiv = document.createElement("div");
         tmpDiv.setAttribute("name", "inputDiv");
         tmpDiv.setAttribute("class", "row");
+
         tmpInput = document.createElement('input');
         tmpInput.setAttribute("type", "text");
         tmpInput.setAttribute("id", 'form_' + formNum + "_colName_" + i);
@@ -262,7 +308,6 @@ function setForm(method, action, columnCount, loadIdx) {
         var btn = document.createElement('input');
         btn.setAttribute("type", "button");
         btn.setAttribute("id", 'form_' + formNum + "_delBtn_" + i);
-        btn.setAttribute("class", "btn btn-outline-danger ml-1");
         btn.addEventListener("click", deleteColumn)
         btn.setAttribute("value", "delete");
         tmpDiv.appendChild(btn);
@@ -272,10 +317,8 @@ function setForm(method, action, columnCount, loadIdx) {
 }
 
 function setDivPos(div, pos) {
-    div.style.position = 'absolute';
-    div.style.left = pos.x + "px"
-    div.style.top = pos.y + "px"
-    div.style.border = "2px solid gray"
+    div.style.left = (pos.x + 35) + "px"
+    div.style.top = (pos.y + 50) + "px"
     div.oncontextmenu = function (e) { e.preventDefault(); };
     return div
 }

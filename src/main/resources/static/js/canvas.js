@@ -19,6 +19,7 @@ window.onload = function () {
     canvas.addEventListener("mouseout", listenEvent)
     canvas.addEventListener("mouseenter", listenEvent)
     canvas.oncontextmenu = function (e) { e.preventDefault(); };
+
     changeSizeCanvas(canvas)
     addOption()
 }
@@ -62,8 +63,8 @@ function listenEvent(e) {
                 div = selectedDiv;
                 formArr[div.children[4].id].pos = JSON.parse(JSON.stringify(pos));
                 div.style.position = 'absolute';
-                div.style.left = pos.x + "px"
-                div.style.top = pos.y + "px"
+                div.style.left = (pos.x + 35 )+ "px" 
+                div.style.top = (pos.y + 70) + "px"
                 div.style.border = "2px solid gray"
                 mouseFlag = false
             }
@@ -97,10 +98,6 @@ function changePos(pos, e) {
     }
 }
 function drawRect(box) {
-    var canvas = document.getElementById("canvas");
-    var ctx = canvas.getContext("2d");
-    //ctx.fillStyle = "rgb(200,0,0)";
-    //ctx.fillRect(box.x, box.y, box.width, box.height);
     var tmp = new Forms("POST", "#", box, columnCount, -1);
     formArr[tmp.id] = tmp;
     console.log(formArr);

@@ -3,7 +3,25 @@ div [name="inputDiv"]>input[type="text"] {
   width: 180px;
   position: relative; 
   left: 15.3px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 3px solid black;
 }
+
+div [name="inputDiv"]>input[type="text"]:focus {
+  outline:none;
+}
+
+div[name="parentDiv"]{
+  position : absolute;
+  border : 2px solid gray;
+  width : 500px;
+  padding: 10px;
+}
+
 .no-drag {
   -ms-user-select: none; 
   -moz-user-select: -moz-none;
@@ -12,21 +30,130 @@ div [name="inputDiv"]>input[type="text"] {
   user-select: none;
 }
 
-div [name="inputDiv"]>input[type="button"] {
+.tableName {
+  margin-left: 10px;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 3px solid black;
+}
+
+.tableName:focus {
+  outline:none;
+}
+
+input[id*="delBtn_"]{
   float: left;
-  width: 100px;
+  width: 60px;
   position: relative; 
   left: 15.3px;
+  margin-bottom: 10px;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 3px solid orange;
+  background-color: white;
 }
+
+input[id*="delBtn_"]:hover{
+  float: left;
+  width: 60px;
+  position: relative; 
+  left: 15.3px;
+  margin-bottom: 10px;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 3px solid orange;
+  background-color: rgb(231, 71, 71);
+  color: white;
+}
+
 div [id^="div_"] {
   float: left;
   width: 470px;
 }
+
+input[id*="_refBtn"]{
+  margin-bottom: 10px;
+  margin-left: 10px;
+  width: 80px;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 3px solid #0d6efd;
+  background-color: white;
+}
+input[id*="_refBtn"]:hover{
+  margin-bottom: 10px;
+  margin-left: 10px;
+  width: 80px;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 3px solid #0d6efd;
+  background-color: #0d6efd;
+  color: white;
+}
+
+input[id$="_addBtn"]{
+  width: 80px;
+  margin-bottom: 10px;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 3px solid #28a745;
+  background-color: white;
+}
+
+input[id$="_addBtn"]:hover{
+  width: 80px;
+  margin-bottom: 10px;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 3px solid #28a745;
+  background-color: #28a745;
+  color: white;
+}
+
+input[id$="_genBtn"]{
+  width: 80px;
+  margin-bottom: 10px;
+  margin-left: 10px;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 3px solid #17a2b8;
+  background-color: white;
+}
+
+input[id$="_genBtn"]:hover{
+  width: 80px;
+  margin-bottom: 10px;
+  margin-left: 10px;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 3px solid #17a2b8;
+  background-color: #17a2b8;
+  color: white;
+}
+
 input[id$="_exitBtn"]:hover{
+  background-color: rgb(231, 71, 71);
+  width: 60px;
   color: white;
 }
 input[id$="_exitBtn"]{
-  color: #ffc107;
+  width: 60px;
+  margin-top: 2%;
+  margin-right: 10px;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 3px solid rgb(231, 71, 71);
+  background-color: white;
 }
 
 .bd-placeholder-img {
