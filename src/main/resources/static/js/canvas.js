@@ -19,7 +19,6 @@ window.onload = function () {
     canvas.addEventListener("mouseout", listenEvent)
     canvas.addEventListener("mouseenter", listenEvent)
     canvas.oncontextmenu = function (e) { e.preventDefault(); };
-
     changeSizeCanvas(canvas)
     addOption()
 }
@@ -60,12 +59,13 @@ function listenEvent(e) {
         } else if (e.type == "mouseup") {
             if (mouseFlag) {
                 changePos(pos, e);
-                div = selectedDiv;
-                formArr[div.children[4].id].pos = JSON.parse(JSON.stringify(pos));
-                div.style.position = 'absolute';
-                div.style.left = (pos.x + 35 )+ "px" 
-                div.style.top = (pos.y + 70) + "px"
-                div.style.border = "2px solid gray"
+                var table = selectedTable;
+                // console.log(pos);
+                tableArr[table.id].pos = JSON.parse(JSON.stringify(pos));
+                table.style.position = 'absolute';
+                table.style.left = (pos.x + 35) + "px"
+                table.style.top = (pos.y + 70) + "px"
+                table.style.border = "2px solid gray"
                 mouseFlag = false
             }
         } else if (e.type == "mousemove") {
@@ -98,8 +98,8 @@ function changePos(pos, e) {
     }
 }
 function drawRect(box) {
-    var tmp = new Forms("POST", "#", box, columnCount, -1);
-    formArr[tmp.id] = tmp;
-    console.log(formArr);
+    var newTable = new Tables(box, columnCount, -1);
+    tableArr[newTable.id] = newTable;
+    console.log(tableArr);
 }
 

@@ -1,8 +1,22 @@
-div [name="inputDiv"]>input[type="text"] {
-  float: left;
+div[id^="table_"][id$="_header"]  {
+  width: 100%;
+}
+div[id^="table_"][id$="_header"] > *:not(:last-of-type) {
+  display: inline;
+}
+div[id$="_header"] > input[type="text"] {
   width: 180px;
-  position: relative; 
-  left: 15.3px;
+}
+div [name="inputDiv"] > * {
+  display: inline;
+}
+div[id^="table_"][id$="_body"]{
+  width: 100%;
+}
+div[id^="table_"][id$="_body"] > * {
+  display: inline;
+}
+div [name="inputDiv"]>input[type="text"] {
   margin-right: 10px;
   margin-bottom: 10px;
   border-top: none;
@@ -10,12 +24,16 @@ div [name="inputDiv"]>input[type="text"] {
   border-right: none;
   border-bottom: 3px solid black;
 }
-
 div [name="inputDiv"]>input[type="text"]:focus {
+  color: white;
+  background-color: rgb(131, 131, 131);
   outline:none;
 }
-
-div[name="parentDiv"]{
+div [name="inputDiv"]>input[type="button"]{
+  margin-right: 25px;
+  float: right;
+}
+div[class="parentDiv"]{
   position : absolute;
   border : 2px solid gray;
   width : 500px;
@@ -39,9 +57,10 @@ div[name="parentDiv"]{
 }
 
 .tableName:focus {
+  color: white;
+  background-color: rgb(131, 131, 131);
   outline:none;
 }
-
 input[id*="delBtn_"]{
   float: left;
   width: 60px;
@@ -67,11 +86,6 @@ input[id*="delBtn_"]:hover{
   border-bottom: 3px solid orange;
   background-color: rgb(231, 71, 71);
   color: white;
-}
-
-div [id^="div_"] {
-  float: left;
-  width: 470px;
 }
 
 input[id*="_refBtn"]{

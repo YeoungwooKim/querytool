@@ -9,10 +9,10 @@ var box = {
     width: 300,
     height: 200
 }
-var formNum = 0;
-var formArr = {};
+var tableNum = 0;
+var tableArr = {};
 
 var mouseFlag = false
-var selectedDiv = null
+var selectedTable = null
 
 var previousErd = "none"
