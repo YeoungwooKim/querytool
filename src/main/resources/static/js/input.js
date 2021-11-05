@@ -56,12 +56,12 @@ function moveEvent(e) {
 }
 
 function deleteColumn(e) {
-    tableId = div.id.split("_")
-    tableId = "table_" + tableId[1];
-    var cCount = Number(tableArr[tableId].columnCount) - 1
-    if (cCount > 0) {
+    var table = (e.target.parentNode).parentNode;
+    var tableId = table.id.substring(0, table.id.length - 5)
+    var modifiedCount = Number(tableArr[tableId].columnCount) - 1
+    if (modifiedCount > 0) {
         e.target.parentNode.remove()
-        tableArr[tableId].columnCount = cCount;
+        tableArr[tableId].columnCount = modifiedCount;
     } else {
         delete tableArr[tableId];
         ((e.target.parentNode).parentNode).parentNode.remove()
@@ -158,30 +158,64 @@ function setDivHeader(loadIdx) {
     return headerDiv;
 }
 
-function setDivBodyRow(loadIdx, i) {
-    var tmpDiv = document.createElement("div");
-    tmpDiv.setAttribute("name", "inputDiv");
-
-    var tmpInput = document.createElement('input');
-    tmpInput.setAttribute("type", "text");
-    tmpInput.setAttribute("id", 'table_' + tableNum + "_colName_" + i);
+function isLoadData(loadIdx) {
     if (loadIdx >= 0) {
-        tmpInput.setAttribute("value", item[loadIdx].column[i].name)
+        return true;
+    } else {
+        return false;
     }
+}
+
+function setElementFromView(tmpDiv, i) {
+    var tmpInput = document.createElement('input');
+    var tmp = (selectedTable == null) ? tableNum : selectedTable.id.split("_");
+    var targetNum = (typeof tmp == Number) ? tableNum : tmp[tmp.length - 1];
+    tmpInput.setAttribute("type", "text");
+    tmpInput.setAttribute("id", 'table_' + targetNum + "_colName_" + i);
     tmpInput.setAttribute("class", 'colName no-drag');
     tmpInput.setAttribute("placeholder", " Column Name_" + i);
     tmpDiv.appendChild(tmpInput);
 
     tmpInput = document.createElement('input');
     tmpInput.setAttribute("type", "text");
-    tmpInput.setAttribute("id", 'table_' + tableNum + "_colAttribute_" + i);
-    if (loadIdx >= 0) {
-        tmpInput.setAttribute("value", item[loadIdx].column[i].type)
-    }
+    tmpInput.setAttribute("id", 'table_' + targetNum + "_colAttribute_" + i);
     tmpInput.setAttribute("class", 'colAttribute no-drag');
     tmpInput.setAttribute("placeholder", " Column Attr_" + i);
 
     tmpDiv.appendChild(tmpInput);
+}
+
+function setElementFromLocal(tmpDiv, loadIdx, i) {
+    var selectedOption = document.getElementById("erds").value;
+    var item = JSON.parse(localStorage.getItem("queryGen_" + selectedOption));
+
+    console.log(item, i);
+
+    var tmpInput = document.createElement('input');
+    tmpInput.setAttribute("type", "text");
+    tmpInput.setAttribute("id", 'table_' + tableNum + "_colName_" + i);
+    tmpInput.setAttribute("value", item[loadIdx].column[i].name)
+    tmpDiv.appendChild(tmpInput);
+
+    tmpInput = document.createElement('input');
+    tmpInput.setAttribute("type", "text");
+    tmpInput.setAttribute("id", 'table_' + tableNum + "_colAttribute_" + i);
+    tmpInput.setAttribute("value", item[loadIdx].column[i].type)
+    tmpInput.setAttribute("class", 'colAttribute no-drag');
+    tmpInput.setAttribute("placeholder", " Column Attr_" + i);
+
+    tmpDiv.appendChild(tmpInput);
+}
+
+function setDivBodyRow(loadIdx, i) {
+    var tmpDiv = document.createElement("div");
+    tmpDiv.setAttribute("name", "inputDiv");
+
+    if (isLoadData(loadIdx)) {
+        setElementFromLocal(tmpDiv, loadIdx, i)
+    } else {
+        setElementFromView(tmpDiv, i)
+    }
 
     var btn = document.createElement('input');
     btn.setAttribute("type", "button");
@@ -213,8 +247,8 @@ function addColumn(e) {
     table.appendChild(setDivBodyRow(-1, table.children.length))
     tableArr[tableId].columnCount = Number(tableArr[tableId].columnCount) + 1;
 
-    if (e.path[3].id.includes("table_")) {
-        selectedTable = e.path[3]
+    if ((e.target.parentNode).parentNode.id.includes("table_")) {
+        selectedTable = (e.target.parentNode).parentNode
     }
 }
 
@@ -223,27 +257,6 @@ function generateQuery(e) {
     var tableName = getTableName(tableId)
     var tableColumn = getColumn(tableId)
     console.log(tableName, tableColumn);
-}
-
-function getTableName(tableId) {
-    var tableName = document.querySelectorAll("input[id^='" + tableId + "'][type=text][class*='tableName']");
-    return tableName[0].value;
-}
-
-function getColumn(tableId) {
-    var arr = []
-    var colName = document.querySelectorAll("input[id^='" + tableId + "'][type=text][class*='colName']");
-    var colAttribute = document.querySelectorAll("input[id^='" + tableId + "'][type=text][class*='colAttribute']");
-
-    for (var i = 0; i < colName.length; i++) {
-        arr.push(
-            {
-                name: colName[i].value,
-                type: colAttribute[i].value
-            }
-        )
-    }
-    return arr;
 }
 
 function clearDivs() {
@@ -327,10 +340,36 @@ function makeListCurrentCanvas() {
     return list;
 }
 
+
+function getTableName(tableId) {
+    var tableName = document.querySelectorAll("input[id^='" + tableId + "'][type=text][class*='tableName']");
+    return tableName[0].value;
+}
+
+function getColumn(tableId) {
+    var arr = []
+    var colName = document.querySelectorAll("input[id^='" + tableId + "'][type=text][class*='colName']");
+    var colAttribute = document.querySelectorAll("input[id^='" + tableId + "'][type=text][class*='colAttribute']");
+
+    for (var i = 0; i < colName.length; i++) {
+        arr.push(
+            {
+                name: colName[i].value,
+                type: colAttribute[i].value
+            }
+        )
+        console.log("output arr : ", arr[i].name, arr[i].type);
+    }
+    return arr;
+}
+
 function saveLocal() {
     var currentErdName = document.getElementById("Current_Erd").value;
-    console.log(currentErdName);
-    var list = makeListCurrentCanvas()
-    localStorage.setItem("queryGen_" + currentErdName, JSON.stringify(list));
-    console.log(JSON.parse(localStorage.getItem("queryGen_" + currentErdName)));
+    if (currentErdName.replaceAll(" ", "") != "") {
+        var list = makeListCurrentCanvas()
+        localStorage.setItem("queryGen_" + currentErdName, JSON.stringify(list));
+        console.log(JSON.parse(localStorage.getItem("queryGen_" + currentErdName)));
+    } else {
+        alert("please type Erd name !!")
+    }
 }
