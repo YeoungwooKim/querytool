@@ -166,19 +166,26 @@ function isLoadData(loadIdx) {
     }
 }
 
-function setElementFromView(tmpDiv, i) {
+function setElementFromView(tmpDiv, i, e) {
     var tmpInput = document.createElement('input');
-    var tmp = (selectedTable == null) ? tableNum : selectedTable.id.split("_");
-    var targetNum = (typeof tmp == Number) ? tableNum : tmp[tmp.length - 1];
+    var targetId = null;
+    if (e == null) {
+        targetId = tableNum;
+    } else {
+        targetId = (e.target.parentNode).parentNode.id;
+    }
+
     tmpInput.setAttribute("type", "text");
-    tmpInput.setAttribute("id", 'table_' + targetNum + "_colName_" + i);
+    tmpInput.setAttribute("id",
+        ((typeof targetId == "number") ? "table_" + targetId : targetId) + "_colName_" + i);
     tmpInput.setAttribute("class", 'colName no-drag');
     tmpInput.setAttribute("placeholder", " Column Name_" + i);
     tmpDiv.appendChild(tmpInput);
 
     tmpInput = document.createElement('input');
     tmpInput.setAttribute("type", "text");
-    tmpInput.setAttribute("id", 'table_' + targetNum + "_colAttribute_" + i);
+    tmpInput.setAttribute("id",
+        ((typeof targetId == "number") ? "table_" + targetId : targetId) + "_colAttribute_" + i);
     tmpInput.setAttribute("class", 'colAttribute no-drag');
     tmpInput.setAttribute("placeholder", " Column Attr_" + i);
 
@@ -189,32 +196,32 @@ function setElementFromLocal(tmpDiv, loadIdx, i) {
     var selectedOption = document.getElementById("erds").value;
     var item = JSON.parse(localStorage.getItem("queryGen_" + selectedOption));
 
-    console.log(item, i);
-
     var tmpInput = document.createElement('input');
     tmpInput.setAttribute("type", "text");
     tmpInput.setAttribute("id", 'table_' + tableNum + "_colName_" + i);
-    tmpInput.setAttribute("value", item[loadIdx].column[i].name)
+    tmpInput.setAttribute("value", item[loadIdx].column[i].name);
+    tmpInput.setAttribute("class", 'colAttribute no-drag');
+    tmpInput.setAttribute("placeholder", " Column Attr_" + i);
     tmpDiv.appendChild(tmpInput);
 
     tmpInput = document.createElement('input');
     tmpInput.setAttribute("type", "text");
     tmpInput.setAttribute("id", 'table_' + tableNum + "_colAttribute_" + i);
-    tmpInput.setAttribute("value", item[loadIdx].column[i].type)
+    tmpInput.setAttribute("value", item[loadIdx].column[i].type);
     tmpInput.setAttribute("class", 'colAttribute no-drag');
     tmpInput.setAttribute("placeholder", " Column Attr_" + i);
 
     tmpDiv.appendChild(tmpInput);
 }
 
-function setDivBodyRow(loadIdx, i) {
+function setDivBodyRow(loadIdx, i, e) {
     var tmpDiv = document.createElement("div");
     tmpDiv.setAttribute("name", "inputDiv");
 
     if (isLoadData(loadIdx)) {
         setElementFromLocal(tmpDiv, loadIdx, i)
     } else {
-        setElementFromView(tmpDiv, i)
+        setElementFromView(tmpDiv, i, e)
     }
 
     var btn = document.createElement('input');
@@ -244,7 +251,7 @@ function drawRef(e) {
 function addColumn(e) {
     var table = (e.target.parentNode).previousSibling;
     var tableId = table.id.substring(0, table.id.length - 5)
-    table.appendChild(setDivBodyRow(-1, table.children.length))
+    table.appendChild(setDivBodyRow(-1, table.children.length, e))
     tableArr[tableId].columnCount = Number(tableArr[tableId].columnCount) + 1;
 
     if ((e.target.parentNode).parentNode.id.includes("table_")) {
@@ -332,6 +339,7 @@ function makeListCurrentCanvas() {
                 name: key,
                 columnCount: tableArr[key].columnCount,
                 pos: tableArr[key].pos,
+                //info: getTableInfo(key),
                 tableName: getTableName(key),
                 column: getColumn(key)
             });
@@ -340,6 +348,22 @@ function makeListCurrentCanvas() {
     return list;
 }
 
+// function getTableInfo(tableId){
+//     var tableName = document.querySelectorAll("input[id^='" + tableId + "'][type=text][class*='tableName']");
+//     tableName = tableName[0].value;
+//     var colName = document.querySelectorAll("input[id^='" + tableId + "'][type=text][class*='colName']");
+//     var colAttribute = document.querySelectorAll("input[id^='" + tableId + "'][type=text][class*='colAttribute']");
+//     var arr = {}
+//     for (var i = 0; i < colName.length; i++) {
+//         arr[tableName] = {
+//             name: colName[i].value,
+//             type: colAttribute[i].value
+//         }
+//     }
+//     console.log(arr);
+//     return arr;
+
+// }
 
 function getTableName(tableId) {
     var tableName = document.querySelectorAll("input[id^='" + tableId + "'][type=text][class*='tableName']");
@@ -358,7 +382,6 @@ function getColumn(tableId) {
                 type: colAttribute[i].value
             }
         )
-        console.log("output arr : ", arr[i].name, arr[i].type);
     }
     return arr;
 }
