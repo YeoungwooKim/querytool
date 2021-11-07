@@ -170,6 +170,30 @@ input[id$="_exitBtn"]{
   background-color: white;
 }
 
+input[class="modalExitBtn"]{
+  width: 100px;
+  height: 50px;
+  margin-top: 2%;
+  margin-right: 10px;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 3px solid rgb(231, 71, 71);
+  background-color: white;
+}
+
+input[class="modalExitBtn"]:hover{
+  background-color: rgb(231, 71, 71);
+  width: 100px;
+  height: 50px;
+  color: white;
+}
+
+textarea {
+  width: 100%;
+  height: 350px;
+}
+
 .bd-placeholder-img {
     font-size: 1.125rem;
     text-anchor: middle;

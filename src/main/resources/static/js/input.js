@@ -114,11 +114,110 @@ function setDivFooter() {
     btn.setAttribute("type", "button");
     btn.setAttribute("id", 'table_' + tableNum + "_genBtn");
     //btn.setAttribute("class", "btn btn-outline-info my-2 mx-1");
+    btn.setAttribute("data-toggle", "modal")
+    btn.setAttribute("data-target", "#table_" + tableNum + "_modal")
     btn.addEventListener("click", generateQuery)
     btn.setAttribute("value", "generate");
     footerDiv.appendChild(btn);
+
+    footerDiv.appendChild(getHiddenModal("table_" + tableNum + "_modal"));
+
     return footerDiv
 }
+
+function getHiddenModal(modalId) {
+    var div = document.createElement("div");
+    div.setAttribute("class", "modal fade")
+    div.setAttribute("id", modalId);
+    div.setAttribute("tabindex", "-1")
+    div.setAttribute("role", "dialog")
+    div.setAttribute("aria-labelledby", "myModalLabel")
+
+    var innerDiv = document.createElement("div");
+    innerDiv.setAttribute("class", "modal-dialog modal-fullsize")
+    innerDiv.setAttribute("role", "document")
+
+    var innerContentDiv = document.createElement("div");
+    innerContentDiv.setAttribute("class", "modal-content modal-fullsize")
+
+    var modalHeaderDiv = document.createElement("div");
+    modalHeaderDiv.setAttribute("class", "modal-header");
+
+    var title = document.createElement("h4");
+    title.setAttribute("id", modalId + "_title");
+    title.setAttribute("class", "modal-title")
+    title.innerText = "dummy title"
+    modalHeaderDiv.appendChild(title);
+
+    var modalBodyDiv = document.createElement("div");
+    modalBodyDiv.setAttribute("class", "modal-body");
+
+    var textarea = document.createElement("textarea");
+    textarea.setAttribute("id", modalId + "_textarea");
+    textarea.setAttribute("rows", "20")
+    textarea.addEventListener("click", copyToClipboard);
+    modalBodyDiv.appendChild(textarea);
+
+    var modalFooter = document.createElement("div");
+    modalFooter.setAttribute("class", "modal-footer");
+
+    var infoWord = document.createElement("h5");
+    infoWord.setAttribute("class", "text-muted")
+    infoWord.innerText = "click the text-area to paste! ";
+    modalFooter.appendChild(infoWord)
+
+    var closeBtn = document.createElement("input")
+    closeBtn.setAttribute("type", "button")
+    closeBtn.setAttribute("class", "modalExitBtn");
+    closeBtn.setAttribute("data-dismiss", "modal")
+    closeBtn.setAttribute("value", "close");
+    modalFooter.appendChild(closeBtn)
+
+    innerContentDiv.appendChild(modalHeaderDiv);
+    innerContentDiv.appendChild(modalBodyDiv);
+    innerContentDiv.appendChild(modalFooter);
+
+    innerDiv.appendChild(innerContentDiv);
+    div.appendChild(innerDiv);
+
+    return div;
+}
+
+function copyToClipboard(e) {
+    var copyText = e.target;
+    copyText.select();
+    copyText.setSelectionRange(0, 99999); /*For mobile devices*/
+    document.execCommand("copy");
+    alert("Copied.. ");
+}
+
+function generateQuery(e) {
+    var tableId = (e.target.parentNode).parentNode.id
+    var tableName = getTableName(tableId)
+    var tableColumn = getColumn(tableId)
+
+    var modalTitle = document.getElementById(tableId + "_modal_title")
+    modalTitle.innerText = tableName;
+
+    var modalTextarea = document.getElementById(tableId + "_modal_textarea")
+    var query = "CREATE TABLE " + tableName +"\n(\n"
+    for (var i = 0; i < tableColumn.length; i++) {
+        for (var key in tableColumn[i]) {
+            if (key == "name") {
+                query += "     `" + tableColumn[i][key] + "`     "
+            } else {
+                if (i == tableColumn.length - 1) {
+                    query += tableColumn[i][key] + "\n"
+                } else {
+                    query += tableColumn[i][key] + ",\n"
+                }
+            }
+        }
+    }
+    query += ");"
+    modalTextarea.innerHTML = query;
+}
+
 
 function setDivHeader(loadIdx) {
     var headerDiv = document.createElement("div");
@@ -138,7 +237,7 @@ function setDivHeader(loadIdx) {
 
     var tmpInput = document.createElement('input');
     tmpInput.setAttribute("type", "text");
-    tmpInput.setAttribute("id", 'table_' + tableNum + "_tblName_" + tableNum);
+    tmpInput.setAttribute("id", "table_" + tableNum + "_tblName" + tableNum);
     tmpInput.setAttribute("class", "tableName no-drag");
     if (loadIdx >= 0) {
         tmpInput.setAttribute("value", item[loadIdx].tableName);
@@ -174,7 +273,6 @@ function setElementFromView(tmpDiv, i, e) {
     } else {
         targetId = (e.target.parentNode).parentNode.id;
     }
-
     tmpInput.setAttribute("type", "text");
     tmpInput.setAttribute("id",
         ((typeof targetId == "number") ? "table_" + targetId : targetId) + "_colName_" + i);
@@ -259,13 +357,6 @@ function addColumn(e) {
     }
 }
 
-function generateQuery(e) {
-    tableId = (e.target.previousSibling).previousSibling.id;
-    var tableName = getTableName(tableId)
-    var tableColumn = getColumn(tableId)
-    console.log(tableName, tableColumn);
-}
-
 function clearDivs() {
     var divs = document.querySelectorAll("div[id^='table_'")
     for (var i = 0; i < divs.length; i++) {
@@ -334,52 +425,34 @@ function loadData() {
 function makeListCurrentCanvas() {
     var list = []
     for (var key in tableArr) {
-        if (document.getElementById(key) != null) {
-            list.push({
-                name: key,
-                columnCount: tableArr[key].columnCount,
-                pos: tableArr[key].pos,
-                //info: getTableInfo(key),
-                tableName: getTableName(key),
-                column: getColumn(key)
-            });
-        }
+        list.push({
+            name: key,
+            columnCount: tableArr[key].columnCount,
+            pos: tableArr[key].pos,
+            tableName: getTableName(key),
+            column: getColumn(key)
+        });
     }
     return list;
 }
 
-// function getTableInfo(tableId){
-//     var tableName = document.querySelectorAll("input[id^='" + tableId + "'][type=text][class*='tableName']");
-//     tableName = tableName[0].value;
-//     var colName = document.querySelectorAll("input[id^='" + tableId + "'][type=text][class*='colName']");
-//     var colAttribute = document.querySelectorAll("input[id^='" + tableId + "'][type=text][class*='colAttribute']");
-//     var arr = {}
-//     for (var i = 0; i < colName.length; i++) {
-//         arr[tableName] = {
-//             name: colName[i].value,
-//             type: colAttribute[i].value
-//         }
-//     }
-//     console.log(arr);
-//     return arr;
-
-// }
 
 function getTableName(tableId) {
-    var tableName = document.querySelectorAll("input[id^='" + tableId + "'][type=text][class*='tableName']");
-    return tableName[0].value;
+    var tableName = document.querySelector("input[id*='" + tableId + "'][type=text][class*='tableName']");
+    return tableName.value;
 }
 
 function getColumn(tableId) {
     var arr = []
-    var colName = document.querySelectorAll("input[id^='" + tableId + "'][type=text][class*='colName']");
-    var colAttribute = document.querySelectorAll("input[id^='" + tableId + "'][type=text][class*='colAttribute']");
+    var colName = document.querySelectorAll("input[id^='" + tableId + "_colName_']");
+    //var colAttribute = colName.nextElementSibling;
+    //document.querySelectorAll("input[id*='" + tableId + "'][type=text][class*='colAttribute']");
 
     for (var i = 0; i < colName.length; i++) {
         arr.push(
             {
                 name: colName[i].value,
-                type: colAttribute[i].value
+                type: colName[i].nextElementSibling.value
             }
         )
     }
