@@ -170,6 +170,29 @@ input[id$="_exitBtn"]{
   background-color: white;
 }
 
+input[class="modalInsertBtn"]{
+  height: 50px;
+  margin-top: 2%;
+  margin-right: 10px;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 3px solid #28a745;
+  background-color: white;
+}
+
+input[class="modalInsertBtn"]:hover{
+  height: 50px;
+  margin-top: 2%;
+  margin-right: 10px;
+  /* border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 3px solid rgb(231, 71, 71); */
+  background-color: #28a745;
+  color: white;
+}
+
 input[class="modalExitBtn"]{
   width: 100px;
   height: 50px;

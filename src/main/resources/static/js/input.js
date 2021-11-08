@@ -104,7 +104,9 @@ function setDivFooter() {
     tmpDiv.setAttribute("aria-labelledby", 'table_' + tableNum + "_refBtn");
 
     var drop = document.createElement("div")
+    drop.setAttribute("id", "table_"+tableNum+"_dropdown")
     drop.innerText = "hihihihi" + tableNum;
+
     tmpDiv.appendChild(drop)
     tmpSpan.appendChild(tmpDiv);
 
@@ -123,6 +125,31 @@ function setDivFooter() {
     footerDiv.appendChild(getHiddenModal("table_" + tableNum + "_modal"));
 
     return footerDiv
+}
+
+function drawRef(e) {
+    var div = e.target.nextSibling.children[0]
+    /*
+    1. 현재 테이블의 속성을 가져오기
+    2. 테이블의 속성에 따라 분류하여 다른 테이블 검색하기
+    ex. userTable 
+            id int,
+            name string,
+            school_ID int,
+            birth datetime
+        
+        schoolTable
+            id int,
+            name string,
+            employeeId int
+            open datetime,
+            close datetime
+
+        userTable
+        id -> (schoolTable) id && (schoolTable) employeeId
+        name -> (schoolTable) name
+        birth -> (schoolTable) open && (schoolTable) close
+    */
 }
 
 function getHiddenModal(modalId) {
@@ -152,6 +179,11 @@ function getHiddenModal(modalId) {
     var modalBodyDiv = document.createElement("div");
     modalBodyDiv.setAttribute("class", "modal-body");
 
+    var infoWord = document.createElement("h5");
+    infoWord.setAttribute("class", "text-muted")
+    infoWord.innerText = "click the text-area to paste! ";
+    modalBodyDiv.appendChild(infoWord);
+
     var textarea = document.createElement("textarea");
     textarea.setAttribute("id", modalId + "_textarea");
     textarea.setAttribute("rows", "20")
@@ -161,13 +193,15 @@ function getHiddenModal(modalId) {
     var modalFooter = document.createElement("div");
     modalFooter.setAttribute("class", "modal-footer");
 
-    var infoWord = document.createElement("h5");
-    infoWord.setAttribute("class", "text-muted")
-    infoWord.innerText = "click the text-area to paste! ";
-    modalFooter.appendChild(infoWord)
+    var insertBtn = document.createElement("input");
+    insertBtn.setAttribute("type", "button");
+    insertBtn.setAttribute("class", "modalInsertBtn");
+    insertBtn.setAttribute("value", "I want to insert TEST-DATA at this table! ");
+    insertBtn.addEventListener("click", genInsertQuery);
+    modalFooter.appendChild(insertBtn);
 
     var closeBtn = document.createElement("input")
-    closeBtn.setAttribute("type", "button")
+    closeBtn.setAttribute("type", "button");
     closeBtn.setAttribute("class", "modalExitBtn");
     closeBtn.setAttribute("data-dismiss", "modal")
     closeBtn.setAttribute("value", "close");
@@ -181,6 +215,51 @@ function getHiddenModal(modalId) {
     div.appendChild(innerDiv);
 
     return div;
+}
+
+function genInsertQuery(e) {
+    var numberOfData = Number(prompt("how many data want to insert ? "))
+    if (numberOfData > 0 && typeof numberOfData == "number") {
+        var textareaId = e.target.parentNode.previousSibling.children[1].id
+        var textarea = document.getElementById(textareaId);
+        var tableName = e.target.parentNode.previousSibling.previousSibling.children[0].innerText
+        var tableColumn = getColumnNames(e)
+        var query = ""
+        for (var n = 0; n < numberOfData; n++) {
+            query += "INSERT INTO  " + tableName + " ( ";
+            for (var i = 0; i < tableColumn.length; i++) {
+                query += " " + tableColumn[i]
+                if (i != tableColumn.length - 1) {
+                    query += ", "
+                }
+            }
+            query += " ) \nVALUES  ( ";
+            for (var i = 0; i < tableColumn.length; i++) {
+                query += " " + tableColumn[i] + "_data" + "_" + n
+                if (i != tableColumn.length - 1) {
+                    query += ", "
+                }
+            }
+            query += "); \n";
+        }
+        textarea.innerHTML = query
+    }
+}
+
+function getColumnNames(e) {
+    var selectedOption = document.getElementById("erds").value;
+    var list = JSON.parse(localStorage.getItem("queryGen_" + selectedOption));
+    var result = []
+    var tableName = e.target.parentNode.parentNode.parentNode.parentNode.id.split("_modal")[0];
+
+    for (var i = 0; i < list.length; i++) {
+        if (list[i].name == tableName) {
+            for (var k = 0; k < list[i].column.length; k++) {
+                result.push(list[i].column[k].name)
+            }
+        }
+    }
+    return result;
 }
 
 function copyToClipboard(e) {
@@ -200,7 +279,7 @@ function generateQuery(e) {
     modalTitle.innerText = tableName;
 
     var modalTextarea = document.getElementById(tableId + "_modal_textarea")
-    var query = "CREATE TABLE " + tableName +"\n(\n"
+    var query = "CREATE TABLE " + tableName + "\n(\n"
     for (var i = 0; i < tableColumn.length; i++) {
         for (var key in tableColumn[i]) {
             if (key == "name") {
@@ -340,10 +419,6 @@ function setDivBody(columnCount, loadIdx) {
         bodyDiv.appendChild(setDivBodyRow(loadIdx, i));
     }
     return bodyDiv
-}
-
-function drawRef(e) {
-    console.log(e.target);
 }
 
 function addColumn(e) {
