@@ -90,8 +90,9 @@ function setDivFooter() {
 
     btn = document.createElement('input');
     btn.setAttribute("type", "button");
+
     btn.setAttribute("class", "dropdown-toggle")
-    btn.setAttribute("data-toggle", "dropdown")
+    //btn.setAttribute("data-toggle", "dropdown")
     btn.setAttribute("aria-haspopup", "true")
     btn.setAttribute("aria-expanded", "false")
     btn.setAttribute("id", 'table_' + tableNum + "_refBtn");
@@ -104,8 +105,9 @@ function setDivFooter() {
     tmpDiv.setAttribute("aria-labelledby", 'table_' + tableNum + "_refBtn");
 
     var drop = document.createElement("div")
-    drop.setAttribute("id", "table_"+tableNum+"_dropdown")
-    drop.innerText = "hihihihi" + tableNum;
+    drop.setAttribute("id", "table_" + tableNum + "_dropdown")
+    drop.setAttribute("class", "dropMenu");
+    //drop.innerText = "hihihihi" + tableNum;
 
     tmpDiv.appendChild(drop)
     tmpSpan.appendChild(tmpDiv);
@@ -127,30 +129,60 @@ function setDivFooter() {
     return footerDiv
 }
 
-function drawRef(e) {
-    var div = e.target.nextSibling.children[0]
-    /*
-    1. 현재 테이블의 속성을 가져오기
-    2. 테이블의 속성에 따라 분류하여 다른 테이블 검색하기
-    ex. userTable 
-            id int,
-            name string,
-            school_ID int,
-            birth datetime
-        
-        schoolTable
-            id int,
-            name string,
-            employeeId int
-            open datetime,
-            close datetime
-
-        userTable
-        id -> (schoolTable) id && (schoolTable) employeeId
-        name -> (schoolTable) name
-        birth -> (schoolTable) open && (schoolTable) close
-    */
+function openOrClose(e) {
+    var parentClass = e.target.parentNode;
+    var nextClass = e.target.nextSibling;
+    if (parentClass.className == "dropdown") {
+        parentClass.className = "dropdown show";
+        e.target.setAttribute("aria-expended", "true");
+        nextClass.className = "dropdown-menu show";
+    } else {
+        parentClass.className = "dropdown"
+        e.target.setAttribute("aria-expended", "false");
+        nextClass.className = "dropdown-menu";
+    }
 }
+
+function drawRef(e) {
+    openOrClose(e)
+    var div = e.target.nextSibling.children[0]
+    var divTxt = "";
+    var myTableName = div.id.split("_dropdown")
+    myTableName = myTableName[0]
+    var selectedOption = document.getElementById("erds").value;
+    var fromLocalList = JSON.parse(localStorage.getItem("queryGen_" + selectedOption));
+    var myTable = {}
+    var otherTable = {}
+
+    for (var i = 0; i < fromLocalList.length; i++) {
+        if (fromLocalList[i].name == myTableName) {
+            myTable = fromLocalList[i]
+        } else {
+            otherTable[fromLocalList[i].name] = fromLocalList[i];
+        }
+    }
+
+    for (var i = 0; i < myTable.column.length; i++) {
+        divTxt += "-----" + myTable.column[i].name + "-----\n";
+        for (var key in otherTable) {
+            var tableTitle = document.getElementById(key).children[0].children[1].value
+            for (var k = 0; k < otherTable[key].column.length; k++) {
+                if (myTable.column[i].type == otherTable[key].column[k].type) {
+                    divTxt += "[" + tableTitle + "]" + otherTable[key].column[k].name + "\n";
+                    //tmp.push(otherTable[key].column[k].name)
+                }
+            }
+            
+            // div.appendChild( addForeignKeys(from, to))
+        }
+    }
+    console.log(divTxt);
+}
+
+function addForeignKeys(from, to) {
+    
+}
+
 
 function getHiddenModal(modalId) {
     var div = document.createElement("div");
