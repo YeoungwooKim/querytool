@@ -107,7 +107,6 @@ function setDivFooter() {
     var drop = document.createElement("div")
     drop.setAttribute("id", "table_" + tableNum + "_dropdown")
     drop.setAttribute("class", "dropMenu");
-    //drop.innerText = "hihihihi" + tableNum;
 
     tmpDiv.appendChild(drop)
     tmpSpan.appendChild(tmpDiv);
@@ -129,6 +128,13 @@ function setDivFooter() {
     return footerDiv
 }
 
+$(document).mouseup(function (e) {
+    var LayerPopup = $(".dropdown-menu");
+    if (LayerPopup.has(e.target).length === 0) {
+        LayerPopup.removeClass("show");
+    }
+});
+
 function openOrClose(e) {
     var parentClass = e.target.parentNode;
     var nextClass = e.target.nextSibling;
@@ -144,43 +150,126 @@ function openOrClose(e) {
 }
 
 function drawRef(e) {
-    openOrClose(e)
-    var div = e.target.nextSibling.children[0]
-    var divTxt = "";
-    var myTableName = div.id.split("_dropdown")
-    myTableName = myTableName[0]
     var selectedOption = document.getElementById("erds").value;
     var fromLocalList = JSON.parse(localStorage.getItem("queryGen_" + selectedOption));
-    var myTable = {}
-    var otherTable = {}
+    if (fromLocalList == null) {
+        alert("nothing inside..")
+    } else {
+        openOrClose(e)
+        var div = e.target.nextSibling.children[0]
+        var divTxt = "";
+        var myTableName = div.id.split("_dropdown")
+        myTableName = myTableName[0]
+        var myTable = {}
+        var otherTable = {}
 
-    for (var i = 0; i < fromLocalList.length; i++) {
-        if (fromLocalList[i].name == myTableName) {
-            myTable = fromLocalList[i]
-        } else {
-            otherTable[fromLocalList[i].name] = fromLocalList[i];
+        for (var i = 0; i < fromLocalList.length; i++) {
+            if (fromLocalList[i].name == myTableName) {
+                myTable[myTableName] = fromLocalList[i]
+            } else {
+                otherTable[fromLocalList[i].name] = fromLocalList[i];
+            }
         }
-    }
-
-    for (var i = 0; i < myTable.column.length; i++) {
-        divTxt += "-----" + myTable.column[i].name + "-----\n";
-        for (var key in otherTable) {
-            var tableTitle = document.getElementById(key).children[0].children[1].value
-            for (var k = 0; k < otherTable[key].column.length; k++) {
-                if (myTable.column[i].type == otherTable[key].column[k].type) {
-                    divTxt += "[" + tableTitle + "]" + otherTable[key].column[k].name + "\n";
-                    //tmp.push(otherTable[key].column[k].name)
+        var result = [];
+        for (var i = 0; i < myTable[myTableName].column.length; i++) {
+            divTxt += "-----" + myTable[myTableName].column[i].name + "-----\n";
+            for (var key in otherTable) {
+                var tableTitle = document.getElementById(key).children[0].children[1].value
+                for (var k = 0; k < otherTable[key].column.length; k++) {
+                    if (myTable[myTableName].column[i].type == otherTable[key].column[k].type) {
+                        divTxt += "[" + tableTitle + "]" + otherTable[key].column[k].name + "\n";
+                        result.push({
+                            key: key,
+                            name: otherTable[key].column[k].name,
+                            type: otherTable[key].column[k].type
+                        });
+                    }
                 }
             }
-            
-            // div.appendChild( addForeignKeys(from, to))
         }
+        while (div.hasChildNodes()) {
+            div.removeChild(div.firstChild);
+        }
+        div.appendChild(addForeignKeys(myTable[myTableName], result))
+        // console.log(divTxt);
     }
-    console.log(divTxt);
 }
 
 function addForeignKeys(from, to) {
-    
+    var div = document.createElement("div");
+    var idx = from.name.split("_");
+    idx = idx[1];
+    for (var i = 0; i < from.column.length; i++) {
+        var doc = document.createElement("div");
+        doc.setAttribute("id", "dropdown_doc_" + idx + "_" + i);
+        var docTitle = document.createElement("div");
+        docTitle.setAttribute("id", "dropdown_docTitle_" + idx + "_" + i);
+        docTitle.innerHTML = from.column[i].name;
+        doc.appendChild(docTitle);
+
+        for (var k = 0; k < to.length; k++) {
+            var docBody = document.createElement("div");
+            docBody.setAttribute("id", "dropdown_docBody_" + idx + "_" + i + "_" + k);
+            var docBodyChkbox = document.createElement("input");
+            docBodyChkbox.setAttribute("type", "checkbox")
+            docBodyChkbox.setAttribute("id", "dropdown_docBody_chk" + idx + "_" + i + "_" + k);
+            docBody.appendChild(docBodyChkbox)
+            if (from.column[i].type == to[k].type) {
+                var tblName = document.getElementById(to[k].key).children[0].children[1].value
+                docBody.innerHTML += "[" + tblName + "] " + to[k].name;
+                doc.appendChild(docBody);
+                div.appendChild(doc);
+            }
+        }
+    }
+    var docSubmit = document.createElement("input")
+    docSubmit.setAttribute("type", "button")
+    docSubmit.setAttribute("class", "refSubmit")
+    docSubmit.setAttribute("value", "add")
+    docSubmit.addEventListener("click", saveForeign)
+    div.appendChild(docSubmit)
+
+    var hidden = document.createElement("input")
+    hidden.setAttribute("type", "hidden")
+    hidden.setAttribute("value", document.getElementById(from.name).children[0].children[1].value)
+    div.appendChild(hidden)
+
+    return div;
+}
+
+function saveForeign(e) {
+    var chkList = document.querySelectorAll("input[id*='dropdown_docBody_chk']");
+    chkList = Array.prototype.slice.call(chkList); 
+    var fromTableName = e.target.nextSibling.value;
+    var fromColumnName = "";
+    var toTableName = "";
+    var toColumnName = "";
+
+    for (var i = 0; i < chkList.length; i++) {
+        if (chkList[i].parentNode.parentNode.nextElementSibling != e.target) {
+            chkList.splice(i, 1);
+            i--;
+        }
+    }
+
+    for (var i = 0; i < chkList.length; i++) {
+        if (chkList[i].checked == true) {
+            fromColumnName = chkList[i].parentNode.previousSibling.innerText
+            var tmp = chkList[i].nextSibling.nodeValue
+            tmp = tmp.split(" ");
+            toTableName = tmp[0].substring(1, tmp[0].length - 1);
+            toColumnName = tmp[1];
+
+            console.log(fromTableName, fromColumnName);
+            console.log(toTableName, toColumnName);
+            
+
+
+
+
+            
+        }
+    }
 }
 
 

@@ -11,6 +11,7 @@ var box = {
 }
 var tableNum = 0;
 var tableArr = {};
+var foreignKeys = {};
 
 var mouseFlag = false
 var selectedTable = null
