@@ -27,7 +27,7 @@ function addOption() {
     var option = document.getElementById("erds");
     for (i = 0; i < localStorage.length; i++) {
         key = localStorage.key(i);
-        if (key.includes("queryGen_")) {
+        if (key.includes("queryGen_") && !key.includes("_foreign")) {
             key = key.split("_");
             option.innerHTML += "<option>" + key[1] + "</option>"
         }

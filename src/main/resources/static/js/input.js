@@ -239,39 +239,49 @@ function addForeignKeys(from, to) {
 
 function saveForeign(e) {
     var chkList = document.querySelectorAll("input[id*='dropdown_docBody_chk']");
-    chkList = Array.prototype.slice.call(chkList); 
+    chkList = Array.prototype.slice.call(chkList);
     var fromTableName = e.target.nextSibling.value;
     var fromColumnName = "";
     var toTableName = "";
     var toColumnName = "";
+    var target = e.target.parentNode.parentNode.parentNode;
+    var currentErdName = document.getElementById("Current_Erd").value;
 
     for (var i = 0; i < chkList.length; i++) {
-        if (chkList[i].parentNode.parentNode.nextElementSibling != e.target) {
+        if (chkList[i].parentNode.parentNode.parentNode.parentNode.parentNode != target) {
+            chkList.splice(i, 1);
+            i--;
+        } else if (chkList[i].checked != true) {
             chkList.splice(i, 1);
             i--;
         }
     }
 
+    var set = new Set();
     for (var i = 0; i < chkList.length; i++) {
-        if (chkList[i].checked == true) {
-            fromColumnName = chkList[i].parentNode.previousSibling.innerText
-            var tmp = chkList[i].nextSibling.nodeValue
-            tmp = tmp.split(" ");
-            toTableName = tmp[0].substring(1, tmp[0].length - 1);
-            toColumnName = tmp[1];
-
-            console.log(fromTableName, fromColumnName);
-            console.log(toTableName, toColumnName);
-            
-
-
-
-
-            
-        }
+        fromColumnName = chkList[i].parentNode.parentNode.children[0].innerText
+        var tmp = chkList[i].nextSibling.nodeValue
+        tmp = tmp.split(" ");
+        toTableName = tmp[0].substring(1, tmp[0].length - 1);
+        toColumnName = tmp[1];
+        set.add({
+            fromTableName: fromTableName,
+            fromColumnName: fromColumnName,
+            toTableName: toTableName,
+            toColumnName: toColumnName
+        })
     }
+    var origin = new Set(JSON.parse(localStorage.getItem("queryGen_" + currentErdName + "_foreign")));
+    var result = []
+    if (set.size != origin.size) {
+        set = Array.from(set);
+        for (var item of set) {
+            result.push(item)
+        }
+        localStorage.setItem("queryGen_" + currentErdName + "_foreign", JSON.stringify(result));
+    }
+    console.log(JSON.stringify(set) == JSON.stringify(result), set, result);
 }
-
 
 function getHiddenModal(modalId) {
     var div = document.createElement("div");
