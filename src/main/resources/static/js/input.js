@@ -90,9 +90,7 @@ function setDivFooter() {
 
     btn = document.createElement('input');
     btn.setAttribute("type", "button");
-
     btn.setAttribute("class", "dropdown-toggle")
-    //btn.setAttribute("data-toggle", "dropdown")
     btn.setAttribute("aria-haspopup", "true")
     btn.setAttribute("aria-expanded", "false")
     btn.setAttribute("id", 'table_' + tableNum + "_refBtn");
@@ -132,6 +130,7 @@ $(document).mouseup(function (e) {
     var LayerPopup = $(".dropdown-menu");
     if (LayerPopup.has(e.target).length === 0) {
         LayerPopup.removeClass("show");
+        console.log("close");
     }
 });
 
@@ -142,6 +141,7 @@ function openOrClose(e) {
         parentClass.className = "dropdown show";
         e.target.setAttribute("aria-expended", "true");
         nextClass.className = "dropdown-menu show";
+        console.log("hi");
     } else {
         parentClass.className = "dropdown"
         e.target.setAttribute("aria-expended", "false");
@@ -155,7 +155,7 @@ function drawRef(e) {
     if (fromLocalList == null) {
         alert("nothing inside..")
     } else {
-        openOrClose(e)
+        //openOrClose(e)
         var div = e.target.nextSibling.children[0]
         var divTxt = "";
         var myTableName = div.id.split("_dropdown")
@@ -257,30 +257,50 @@ function saveForeign(e) {
         }
     }
 
-    var set = new Set();
-    for (var i = 0; i < chkList.length; i++) {
-        fromColumnName = chkList[i].parentNode.parentNode.children[0].innerText
-        var tmp = chkList[i].nextSibling.nodeValue
-        tmp = tmp.split(" ");
-        toTableName = tmp[0].substring(1, tmp[0].length - 1);
-        toColumnName = tmp[1];
-        set.add({
-            fromTableName: fromTableName,
-            fromColumnName: fromColumnName,
-            toTableName: toTableName,
-            toColumnName: toColumnName
-        })
-    }
-    var origin = new Set(JSON.parse(localStorage.getItem("queryGen_" + currentErdName + "_foreign")));
-    var result = []
-    if (set.size != origin.size) {
-        set = Array.from(set);
-        for (var item of set) {
-            result.push(item)
+    var foreignKeys = JSON.parse(localStorage.getItem("queryGen_" + currentErdName + "_foreign"));
+    if (foreignKeys == null) {
+        var tblNames = document.querySelectorAll("input[id*='tblName']");
+        foreignKeys = {}
+        for (var i = 0; i < tblNames.length; i++) {
+            foreignKeys[tblNames[i].value] = [];
         }
-        localStorage.setItem("queryGen_" + currentErdName + "_foreign", JSON.stringify(result));
     }
-    console.log(JSON.stringify(set) == JSON.stringify(result), set, result);
+
+    var arr = [];
+    var key = "";
+
+    if (chkList.length > 0) {
+        for (var i = 0; i < chkList.length; i++) {
+            fromColumnName = chkList[i].parentNode.parentNode.children[0].innerText
+            var tmp = chkList[i].nextSibling.nodeValue
+            tmp = tmp.split(" ");
+            toTableName = tmp[0].substring(1, tmp[0].length - 1);
+            toColumnName = tmp[1];
+
+            arr.push({
+                fromTableName: fromTableName,
+                fromColumnName: fromColumnName,
+                toTableName: toTableName,
+                toColumnName: toColumnName
+            })
+            key = fromTableName;
+        }
+        if (isEqual(foreignKeys[key], arr) == false) {
+            foreignKeys[key] = arr;
+        }
+    } else {
+        key = e.target.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.children[0].children[1].value
+        foreignKeys[key] = [];
+    }
+    localStorage.setItem("queryGen_" + currentErdName + "_foreign", JSON.stringify(foreignKeys));
+
+}
+
+function isEqual(origin, changed) {
+    if (JSON.stringify(origin) == JSON.stringify(changed)) {
+        return true;
+    }
+    return false;
 }
 
 function getHiddenModal(modalId) {
