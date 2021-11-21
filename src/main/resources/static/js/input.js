@@ -90,7 +90,9 @@ function setDivFooter() {
 
     btn = document.createElement('input');
     btn.setAttribute("type", "button");
+
     btn.setAttribute("class", "dropdown-toggle")
+    // btn.setAttribute("data-toggle", "dropdown")
     btn.setAttribute("aria-haspopup", "true")
     btn.setAttribute("aria-expanded", "false")
     btn.setAttribute("id", 'table_' + tableNum + "_refBtn");
@@ -126,22 +128,15 @@ function setDivFooter() {
     return footerDiv
 }
 
-$(document).mouseup(function (e) {
-    var LayerPopup = $(".dropdown-menu");
-    if (LayerPopup.has(e.target).length === 0) {
-        LayerPopup.removeClass("show");
-        console.log("close");
-    }
-});
-
 function openOrClose(e) {
     var parentClass = e.target.parentNode;
     var nextClass = e.target.nextSibling;
+    var currentErdName = document.getElementById("Current_Erd").value;
+
     if (parentClass.className == "dropdown") {
         parentClass.className = "dropdown show";
         e.target.setAttribute("aria-expended", "true");
         nextClass.className = "dropdown-menu show";
-        console.log("hi");
     } else {
         parentClass.className = "dropdown"
         e.target.setAttribute("aria-expended", "false");
@@ -153,9 +148,9 @@ function drawRef(e) {
     var selectedOption = document.getElementById("erds").value;
     var fromLocalList = JSON.parse(localStorage.getItem("queryGen_" + selectedOption));
     if (fromLocalList == null) {
-        alert("nothing inside..")
+        alert("nothing matched..")
     } else {
-        //openOrClose(e)
+        openOrClose(e)
         var div = e.target.nextSibling.children[0]
         var divTxt = "";
         var myTableName = div.id.split("_dropdown")
@@ -177,7 +172,7 @@ function drawRef(e) {
                 var tableTitle = document.getElementById(key).children[0].children[1].value
                 for (var k = 0; k < otherTable[key].column.length; k++) {
                     if (myTable[myTableName].column[i].type == otherTable[key].column[k].type) {
-                        divTxt += "[" + tableTitle + "]" + otherTable[key].column[k].name + "\n";
+                        divTxt += "[" + tableTitle + "] " + otherTable[key].column[k].name + "\n";
                         result.push({
                             key: key,
                             name: otherTable[key].column[k].name,
@@ -192,6 +187,32 @@ function drawRef(e) {
         }
         div.appendChild(addForeignKeys(myTable[myTableName], result))
         // console.log(divTxt);
+
+        var currentErdName = document.getElementById("Current_Erd").value;
+        var list = JSON.parse(localStorage.getItem("queryGen_" + currentErdName + "_foreign"));
+        if (list != null) {
+            for (var key in list) {
+                if (list[key].length > 0) {
+                    for (var i = 0; i < list[key].length; i++) {
+                        var sentese = "[" + list[key][i].toTableName + "] " + list[key][i].toColumnName;
+                        var target = $('div:contains("' + sentese + '")');
+                        for (var k = 0; k < target.length; k++) {
+                            if (target[k].hasChildNodes() && target[k].children[0].value == sentese) {
+                                target = target[k];
+                            }
+                        }
+                        var parent = target.parentNode.innerText;
+                        parent = parent.split("\n");
+                        parent = parent[0];
+                        if (parent == list[key][i].fromColumnName) {
+                            console.log(target);
+                            test = target;
+                            target.children[0].checked = true;
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -215,7 +236,8 @@ function addForeignKeys(from, to) {
             docBodyChkbox.setAttribute("id", "dropdown_docBody_chk" + idx + "_" + i + "_" + k);
             docBody.appendChild(docBodyChkbox)
             if (from.column[i].type == to[k].type) {
-                var tblName = document.getElementById(to[k].key).children[0].children[1].value
+                var tblName = document.getElementById(to[k].key).children[0].children[1].value;
+                docBodyChkbox.setAttribute("value", "[" + tblName + "] " + to[k].name);
                 docBody.innerHTML += "[" + tblName + "] " + to[k].name;
                 doc.appendChild(docBody);
                 div.appendChild(doc);
